@@ -215,9 +215,10 @@ def run_simulation():
                         min(255, colors[idx][2] + bl),
                     ]
 
-        # WARLS UDP packet: byte 0 = protocol (1), byte 1 = timeout (2s)
-        # Then for each LED: byte 0 = index, bytes 1-3 = R,G,B
-        packet = bytearray([1, 2])
+        # WARLS UDP packet: byte 0 = protocol (1), byte 1 = timeout (5s)
+        # Send every frame regardless — keeps WLED in realtime mode during dark gaps
+        # Timeout set to 5s so WLED stays live even if a few packets are dropped
+        packet = bytearray([1, 5])
         for i, (r, g, b) in enumerate(colors):
             if i < 255:  # WARLS supports up to 255 LEDs by index
                 packet += bytearray([i, r, g, b])
