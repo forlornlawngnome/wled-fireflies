@@ -515,23 +515,23 @@
 })();
 
 // ── State ─────────────────────────────────────────────────────
-const params={n_flies:8,flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65};
+const params={n_flies:4,flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65};
 const SPECIES={
-  pyralis:      {n_flies:8, flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65, burst_n:1,burst_gap:0},
-  marginellus:  {n_flies:6, flash_dur:.20,interval:3.0,jitter:.8, gamma:5.0,coupling:.15,hue:70, burst_n:1,burst_gap:0},
-  brimleyi:     {n_flies:7, flash_dur:.50,interval:5.0,jitter:1.5,gamma:5.0,coupling:.10,hue:68, burst_n:1,burst_gap:0},
-  collustrans:  {n_flies:8, flash_dur:.40,interval:2.5,jitter:.5, gamma:6.0,coupling:.12,hue:67, burst_n:1,burst_gap:0},
-  ignitus:      {n_flies:6, flash_dur:.20,interval:5.1,jitter:.8, gamma:7.0,coupling:.08,hue:63, burst_n:1,burst_gap:0},
-  granulatus:   {n_flies:8, flash_dur:.50,interval:2.0,jitter:.4, gamma:5.0,coupling:.10,hue:66, burst_n:1,burst_gap:0},
-  consanguineus:{n_flies:7, flash_dur:.30,interval:5.0,jitter:1.0,gamma:5.0,coupling:.10,hue:68, burst_n:2,burst_gap:.5},
-  macdermotti:  {n_flies:6, flash_dur:.30,interval:6.0,jitter:1.2,gamma:5.0,coupling:.08,hue:70, burst_n:2,burst_gap:2.0},
-  consimilis:   {n_flies:6, flash_dur:.15,interval:10.0,jitter:2.0,gamma:6.0,coupling:.10,hue:65,burst_n:6,burst_gap:.3},
-  carolinus:    {n_flies:16,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55, burst_n:1,burst_gap:0},
-  angulata:     {n_flies:5, flash_dur:.60,interval:7.0,jitter:1.5,gamma:3.0,coupling:.05,hue:35, burst_n:1,burst_gap:0},
-  reticulata:   {n_flies:5, flash_dur:4.0,interval:5.0,jitter:1.0,gamma:1.0,coupling:.02,hue:165,burst_n:1,burst_gap:0},
-  sabulosus:    {n_flies:6, flash_dur:.42,interval:7.0,jitter:1.5,gamma:6.0,coupling:.08,hue:67, burst_n:1,burst_gap:0},
-  umbratus:     {n_flies:6, flash_dur:.60,interval:9.0,jitter:2.0,gamma:4.5,coupling:.08,hue:64, burst_n:1,burst_gap:0},
-  greeni:       {n_flies:6, flash_dur:.30,interval:8.0,jitter:1.5,gamma:5.0,coupling:.08,hue:68, burst_n:2,burst_gap:1.4},
+  pyralis:      {n_flies:4, flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65, burst_n:1,burst_gap:0},
+  marginellus:  {n_flies:3, flash_dur:.20,interval:3.0,jitter:.8, gamma:5.0,coupling:.15,hue:70, burst_n:1,burst_gap:0},
+  brimleyi:     {n_flies:4, flash_dur:.50,interval:5.0,jitter:1.5,gamma:5.0,coupling:.10,hue:68, burst_n:1,burst_gap:0},
+  collustrans:  {n_flies:4, flash_dur:.40,interval:2.5,jitter:.5, gamma:6.0,coupling:.12,hue:67, burst_n:1,burst_gap:0},
+  ignitus:      {n_flies:3, flash_dur:.20,interval:5.1,jitter:.8, gamma:7.0,coupling:.08,hue:63, burst_n:1,burst_gap:0},
+  granulatus:   {n_flies:4, flash_dur:.50,interval:2.0,jitter:.4, gamma:5.0,coupling:.10,hue:66, burst_n:1,burst_gap:0},
+  consanguineus:{n_flies:4, flash_dur:.30,interval:5.0,jitter:1.0,gamma:5.0,coupling:.10,hue:68, burst_n:2,burst_gap:.5},
+  macdermotti:  {n_flies:3, flash_dur:.30,interval:6.0,jitter:1.2,gamma:5.0,coupling:.08,hue:70, burst_n:2,burst_gap:2.0},
+  consimilis:   {n_flies:3, flash_dur:.15,interval:10.0,jitter:2.0,gamma:6.0,coupling:.10,hue:65,burst_n:6,burst_gap:.3},
+  carolinus:    {n_flies:8,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55, burst_n:1,burst_gap:0},
+  angulata:     {n_flies:2, flash_dur:.60,interval:7.0,jitter:1.5,gamma:3.0,coupling:.05,hue:35, burst_n:1,burst_gap:0},
+  reticulata:   {n_flies:2, flash_dur:4.0,interval:5.0,jitter:1.0,gamma:1.0,coupling:.02,hue:165,burst_n:1,burst_gap:0},
+  sabulosus:    {n_flies:3, flash_dur:.42,interval:7.0,jitter:1.5,gamma:6.0,coupling:.08,hue:67, burst_n:1,burst_gap:0},
+  umbratus:     {n_flies:3, flash_dur:.60,interval:9.0,jitter:2.0,gamma:4.5,coupling:.08,hue:64, burst_n:1,burst_gap:0},
+  greeni:       {n_flies:3, flash_dur:.30,interval:8.0,jitter:1.5,gamma:5.0,coupling:.08,hue:68, burst_n:2,burst_gap:1.4},
 };
 let selectedSpecies='pyralis';
 let selectedControllerId=null;
