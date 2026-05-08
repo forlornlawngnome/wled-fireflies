@@ -3,7 +3,7 @@
 Firefly WLED Controller — Flask backend
 Supports multiple named WLED controllers, persisted to disk.
 """
-import time, math, random, threading, requests, json, os
+import time, math, random, threading, requests, json, os, socket, struct
 from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
@@ -127,14 +127,17 @@ def run_simulation():
     url   = f"http://{ip}/json/state"
     frame = 0.05
 
-    # Unfreeze segment and turn on before starting
+    # Enable WLED realtime UDP mode (WARLS protocol)
+    # This bypasses the effect engine entirely — designed for external control
+    udp_port = 21324
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    # Tell WLED to enter realtime mode via JSON (timeout=2s, revert after)
     try:
         requests.post(url, json={"on": True, "bri": 255, "seg": [{"id": 0, "frz": False}]}, timeout=1)
         time.sleep(0.1)
     except Exception:
         pass
-
-    last_had_light = False
 
     while not stop_event.is_set():
         t0  = time.time()
@@ -144,11 +147,9 @@ def run_simulation():
             f.tick(now, flies, interval, jitter, coupling, n_leds)
 
         colors = [[0, 0, 0]] * n_leds
-        any_light = False
         for f in flies:
             b = f.intensity(now, flash_dur, gamma)
             if b > 0.01:
-                any_light = True
                 r, g, bl = hsl_to_rgb(hue, 85, int(20 + b * 55))
                 r  = int(r  * b)
                 g  = int(g  * b)
@@ -163,23 +164,23 @@ def run_simulation():
                             min(255, colors[idx][2] + int(bl * fade)),
                         ]
 
-        # Only send if something is glowing, or we need to send a blackout after last flash ends
-        if any_light or last_had_light:
-            payload = {
-                "on":  True,
-                "bri": 255,
-                "seg": [{"id": 0, "frz": False, "i": [v for c in colors for v in c]}]
-            }
-            try:
-                requests.post(url, json=payload, timeout=0.3)
-                state["last_error"] = ""
-            except Exception as e:
-                state["last_error"] = str(e)
+        # WARLS UDP packet: byte 0 = protocol (1), byte 1 = timeout (2s)
+        # Then for each LED: byte 0 = index, bytes 1-3 = R,G,B
+        packet = bytearray([1, 2])
+        for i, (r, g, b) in enumerate(colors):
+            if i < 255:  # WARLS supports up to 255 LEDs by index
+                packet += bytearray([i, r, g, b])
 
-        last_had_light = any_light
+        try:
+            sock.sendto(bytes(packet), (ip, udp_port))
+            state["last_error"] = ""
+        except Exception as e:
+            state["last_error"] = str(e)
 
         elapsed = time.time() - t0
         time.sleep(max(0.0, frame - elapsed))
+
+    sock.close()
 
     try:
         requests.post(url, json={"on": False}, timeout=1)
