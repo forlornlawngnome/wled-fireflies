@@ -1,0 +1,7 @@
+services:
+  firefly:
+    image: ghcr.io/YOUR_GITHUB_USERNAME/firefly-wled:latest
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    network_mode: host   # needed so the container can reach WLED on your LAN
