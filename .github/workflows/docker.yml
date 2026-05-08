@@ -43,5 +43,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gfp,scope=main
-          cache-to: type=gfp,mode=max,scope=main
+          cache-from: type=gha,scope=main
+          cache-to: type=gha,mode=max,scope=main
