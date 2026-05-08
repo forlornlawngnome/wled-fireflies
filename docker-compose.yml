@@ -1,6 +1,6 @@
 services:
   firefly:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/firefly-wled:latest
+    image: ghcr.io/YOUR_GITHUB_USERNAME/wled-fireflies:latest
     ports:
       - "5000:5000"
     restart: unless-stopped
