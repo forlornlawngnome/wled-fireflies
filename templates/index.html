@@ -657,10 +657,23 @@ async function pingForm(){
 }
 
 // ── Species & params ──────────────────────────────────────────
+// Debounced live push to backend when simulation is running
+let pushTimer=null;
+function pushParams(){
+  if(!serverStatus.running)return;
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(async()=>{
+    const body={controller_id:serverStatus.active_controller,species:selectedSpecies,...params};
+    try{await fetch('/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+    catch(e){}
+  },300);
+}
+
 function sliderChange(k,v,dec,suffix=''){
   params[k]=parseFloat(v);
   document.getElementById('v-'+k).textContent=parseFloat(v).toFixed(dec)+suffix;
   respawnFlies();
+  pushParams();
 }
 function selectSpecies(sp,el){
   selectedSpecies=sp;
@@ -679,6 +692,7 @@ function selectSpecies(sp,el){
   params.burst_n=s.burst_n||1;
   params.burst_gap=s.burst_gap||0;
   respawnFlies();
+  pushParams();
 }
 
 // ── Canvas preview ────────────────────────────────────────────
@@ -773,6 +787,7 @@ async function setWaveform(wf) {
     bezier.style.background = 'rgba(200,232,122,.08)'; bezier.style.color = 'var(--accent)';
     saikia.style.background = 'transparent';           saikia.style.color = 'var(--muted)';
   }
+  pushParams();
 }
 
 let couplingEnabled = true;
@@ -804,6 +819,7 @@ function toggleCoupling() {
     slider.style.opacity = '1';
   }
   couplingEnabled = !couplingEnabled;
+  pushParams();
 }
 
 function copyId(id, e){
