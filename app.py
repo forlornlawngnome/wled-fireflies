@@ -127,6 +127,15 @@ def run_simulation():
     url   = f"http://{ip}/json/state"
     frame = 0.05
 
+    # Unfreeze segment and turn on before starting
+    try:
+        requests.post(url, json={"on": True, "bri": 255, "seg": [{"id": 0, "frz": False}]}, timeout=1)
+        time.sleep(0.1)
+    except Exception:
+        pass
+
+    last_had_light = False
+
     while not stop_event.is_set():
         t0  = time.time()
         now = t0
@@ -135,9 +144,11 @@ def run_simulation():
             f.tick(now, flies, interval, jitter, coupling, n_leds)
 
         colors = [[0, 0, 0]] * n_leds
+        any_light = False
         for f in flies:
             b = f.intensity(now, flash_dur, gamma)
             if b > 0.01:
+                any_light = True
                 r, g, bl = hsl_to_rgb(hue, 85, int(20 + b * 55))
                 r  = int(r  * b)
                 g  = int(g  * b)
@@ -152,17 +163,20 @@ def run_simulation():
                             min(255, colors[idx][2] + int(bl * fade)),
                         ]
 
-        payload = {
-            "on":  True,
-            "bri": 255,
-            "seg": [{"id": 0, "i": [v for c in colors for v in c]}]
-        }
+        # Only send if something is glowing, or we need to send a blackout after last flash ends
+        if any_light or last_had_light:
+            payload = {
+                "on":  True,
+                "bri": 255,
+                "seg": [{"id": 0, "frz": False, "i": [v for c in colors for v in c]}]
+            }
+            try:
+                requests.post(url, json=payload, timeout=0.3)
+                state["last_error"] = ""
+            except Exception as e:
+                state["last_error"] = str(e)
 
-        try:
-            requests.post(url, json=payload, timeout=0.3)
-            state["last_error"] = ""
-        except Exception as e:
-            state["last_error"] = str(e)
+        last_had_light = any_light
 
         elapsed = time.time() - t0
         time.sleep(max(0.0, frame - elapsed))
