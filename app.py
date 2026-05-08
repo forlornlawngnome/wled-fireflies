@@ -154,15 +154,13 @@ def run_simulation():
                 r  = int(r  * b)
                 g  = int(g  * b)
                 bl = int(bl * b)
-                for offset in range(-2, 3):
-                    idx = f.led + offset
-                    if 0 <= idx < n_leds:
-                        fade = max(0.0, 1.0 - abs(offset) * 0.4)
-                        colors[idx] = [
-                            min(255, colors[idx][0] + int(r  * fade)),
-                            min(255, colors[idx][1] + int(g  * fade)),
-                            min(255, colors[idx][2] + int(bl * fade)),
-                        ]
+                idx = f.led
+                if 0 <= idx < n_leds:
+                    colors[idx] = [
+                        min(255, colors[idx][0] + r),
+                        min(255, colors[idx][1] + g),
+                        min(255, colors[idx][2] + bl),
+                    ]
 
         # WARLS UDP packet: byte 0 = protocol (1), byte 1 = timeout (2s)
         # Then for each LED: byte 0 = index, bytes 1-3 = R,G,B
