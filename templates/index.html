@@ -96,11 +96,8 @@
   .species-pill{position:relative}
   .sp-tooltip{
     display:none;
-    position:absolute;
-    bottom:calc(100% + 8px);
-    left:50%;
-    transform:translateX(-50%);
-    width:220px;
+    position:fixed;
+    width:240px;
     background:#0d0f1a;
     border:1px solid rgba(200,232,122,.25);
     border-radius:6px;
@@ -109,17 +106,9 @@
     line-height:1.6;
     color:var(--text);
     text-align:left;
-    z-index:100;
+    z-index:1000;
     pointer-events:none;
-    box-shadow:0 4px 24px rgba(0,0,0,.6);
-  }
-  .sp-tooltip::after{
-    content:'';
-    position:absolute;
-    top:100%;left:50%;
-    transform:translateX(-50%);
-    border:6px solid transparent;
-    border-top-color:#0d0f1a;
+    box-shadow:0 4px 24px rgba(0,0,0,.8);
   }
   .species-pill:hover .sp-tooltip{display:block}
   .sp-tooltip-title{font-weight:500;color:var(--accent);margin-bottom:4px;display:block}
@@ -680,6 +669,26 @@ async function poll(){
     if(d.last_error&&d.running)setStatus('error: '+d.last_error,'err');
   }catch(e){}
 }
+
+// Position tooltips dynamically to avoid edge clipping
+document.querySelectorAll('.species-pill').forEach(pill => {
+  const tooltip = pill.querySelector('.sp-tooltip');
+  if (!tooltip) return;
+  pill.addEventListener('mouseenter', () => {
+    const rect = pill.getBoundingClientRect();
+    const tw = 240;
+    const margin = 8;
+    // Position above the pill
+    let top = rect.top - tooltip.offsetHeight - margin;
+    // If it would go off the top, show below instead
+    if (top < margin) top = rect.bottom + margin;
+    // Horizontal: centre on pill, clamp to viewport
+    let left = rect.left + rect.width / 2 - tw / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tw - margin));
+    tooltip.style.top = top + 'px';
+    tooltip.style.left = left + 'px';
+  });
+});
 
 function copyId(id, e){
   e.stopPropagation();
