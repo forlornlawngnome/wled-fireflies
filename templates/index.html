@@ -8,324 +8,121 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #07080f;
-    --surface: #0d0f1a;
-    --surface2: #13162a;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #e8e4d9;
-    --muted: #6b7080;
-    --accent: #c8e87a;
-    --accent2: #7ae8b0;
-    --glow: #a8d840;
-    --danger: #e87a7a;
-    --amber: #e8c47a;
+    --bg:#07080f; --surface:#0d0f1a; --surface2:#13162a;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+    --text:#e8e4d9; --muted:#6b7080;
+    --accent:#c8e87a; --accent2:#7ae8b0; --glow:#a8d840;
+    --danger:#e87a7a; --amber:#e8c47a;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Night sky background */
-  .sky {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse at 30% 20%, rgba(20,30,60,0.8) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(10,25,40,0.6) 0%, transparent 50%);
-  }
-  .stars {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  }
-
-  .layout {
-    position: relative; z-index: 1;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 3rem 2rem 4rem;
-  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.6;min-height:100vh}
+  canvas.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .layout{position:relative;z-index:1;max-width:740px;margin:0 auto;padding:3rem 2rem 4rem}
 
   /* Header */
-  header { margin-bottom: 3rem; }
-  .eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
-  }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 6vw, 3.2rem);
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
-  h1 em {
-    font-style: italic;
-    color: var(--accent);
-  }
-  .subtitle {
-    margin-top: 0.75rem;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 300;
-  }
+  header{margin-bottom:2.5rem}
+  .eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem;opacity:.8}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,3rem);font-weight:400;line-height:1.1}
+  h1 em{font-style:italic;color:var(--accent)}
+  .subtitle{margin-top:.5rem;color:var(--muted);font-size:11px;font-weight:300}
 
-  /* Status bar */
-  .statusbar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 2rem;
-    font-size: 12px;
-  }
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-    transition: background 0.4s, box-shadow 0.4s;
-  }
-  .dot.on {
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--glow);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .dot.err { background: var(--danger); }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  #status-text { color: var(--muted); flex: 1; }
+  /* Status */
+  .statusbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:2rem;font-size:12px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .4s,box-shadow .4s}
+  .dot.on{background:var(--accent);box-shadow:0 0 8px var(--glow);animation:pulse 2s ease-in-out infinite}
+  .dot.err{background:var(--danger)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  #status-text{color:var(--muted);flex:1}
 
   /* Section */
-  .section {
-    margin-bottom: 2rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .section-header {
-    padding: 10px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .section-body { padding: 16px; background: var(--surface); }
+  .section{margin-bottom:1.5rem;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .section-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+  .section-body{padding:16px;background:var(--surface)}
 
-  /* IP input */
-  .ip-row { display: flex; gap: 8px; }
-  input[type="text"] {
-    flex: 1;
-    padding: 9px 12px;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 5px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
+  /* Controllers list */
+  .controllers-list{display:flex;flex-direction:column;gap:8px}
+  .controller-card{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;
+    border:1px solid var(--border2);border-radius:6px;
+    background:var(--bg);cursor:pointer;
+    transition:border-color .15s,background .15s;
+    position:relative;
   }
-  input[type="text"]:focus { border-color: var(--accent); }
-  input[type="text"]::placeholder { color: var(--muted); }
+  .controller-card:hover{border-color:var(--border2);background:var(--surface2)}
+  .controller-card.active{border-color:var(--accent);background:rgba(200,232,122,.05)}
+  .controller-card.running{border-color:var(--accent)}
+  .cc-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+  .controller-card.running .cc-dot{background:var(--accent);box-shadow:0 0 6px var(--glow);animation:pulse 2s ease-in-out infinite}
+  .cc-info{flex:1;min-width:0}
+  .cc-name{font-weight:500;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cc-meta{font-size:11px;color:var(--muted);margin-top:1px}
+  .cc-actions{display:flex;gap:6px;flex-shrink:0}
+  .icon-btn{padding:5px 8px;border:1px solid var(--border2);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Mono',monospace;transition:all .15s;white-space:nowrap}
+  .icon-btn:hover{color:var(--text);background:var(--surface2)}
+  .icon-btn.danger:hover{color:var(--danger);border-color:rgba(232,122,122,.4)}
+  .no-controllers{color:var(--muted);font-size:12px;padding:8px 0;text-align:center}
 
-  .leds-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-  .leds-row label { color: var(--muted); font-size: 12px; min-width: 90px; }
-  .leds-row input[type="number"] {
-    width: 80px;
-    padding: 7px 10px;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 5px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    outline: none;
+  /* Add controller form */
+  .add-form{display:none;margin-top:12px;padding:14px;background:var(--bg);border:1px solid var(--border2);border-radius:6px}
+  .add-form.open{display:block}
+  .form-row{display:flex;gap:8px;margin-bottom:8px}
+  .form-row:last-child{margin-bottom:0}
+  .form-field{flex:1;display:flex;flex-direction:column;gap:4px}
+  .form-field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .form-field input{
+    padding:8px 10px;background:var(--surface);border:1px solid var(--border2);
+    border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;
+    outline:none;transition:border-color .2s;width:100%
   }
-  .leds-row input[type="number"]:focus { border-color: var(--accent); }
+  .form-field input:focus{border-color:var(--accent)}
+  .form-field input::placeholder{color:var(--muted)}
+  .form-btns{display:flex;gap:6px;margin-top:10px}
+  .ping-result{font-size:11px;margin-top:6px;min-height:16px;color:var(--muted)}
+  .ping-result.ok{color:var(--accent2)}
+  .ping-result.err{color:var(--danger)}
 
-  /* Test result */
-  .test-result {
-    margin-top: 8px;
-    font-size: 12px;
-    min-height: 18px;
-    color: var(--muted);
-    padding-left: 2px;
-  }
-  .test-result.ok { color: var(--accent2); }
-  .test-result.err { color: var(--danger); }
+  /* Species */
+  .species-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .species-pill{padding:12px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--muted);cursor:pointer;text-align:center;transition:all .18s;font-family:'DM Mono',monospace;font-size:11px;line-height:1.4}
+  .species-pill:hover{color:var(--text);background:var(--surface2)}
+  .species-pill.active{border-color:var(--accent);color:var(--accent);background:rgba(200,232,122,.05)}
+  .sp-name{font-weight:500;display:block;margin-bottom:2px}
+  .sp-latin{font-style:italic;font-size:10px;opacity:.7;display:block}
+  .sp-detail{font-size:10px;margin-top:4px;opacity:.6;display:block}
 
-  /* Species pills */
-  .species-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .species-pill {
-    padding: 12px 10px;
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--muted);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.18s;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    line-height: 1.4;
-  }
-  .species-pill:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
-  .species-pill.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(200, 232, 122, 0.05);
-  }
-  .species-pill .sp-name { font-weight: 500; display: block; margin-bottom: 2px; }
-  .species-pill .sp-latin { font-style: italic; font-size: 10px; opacity: 0.7; display: block; }
-  .species-pill .sp-detail { font-size: 10px; margin-top: 4px; opacity: 0.6; display: block; }
+  /* Params */
+  .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+  .param{display:flex;flex-direction:column;gap:5px}
+  .param-header{display:flex;justify-content:space-between;align-items:baseline}
+  .param-label{font-size:11px;color:var(--muted);letter-spacing:.05em}
+  .param-value{font-size:12px;color:var(--accent);font-weight:500}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--glow);cursor:pointer;transition:transform .1s}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 
-  /* Sliders */
-  .params-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 20px;
-  }
-  .param {
-    display: flex; flex-direction: column; gap: 5px;
-  }
-  .param-header {
-    display: flex; justify-content: space-between; align-items: baseline;
-  }
-  .param-label { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
-  .param-value { font-size: 12px; color: var(--accent); font-weight: 500; }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 2px;
-    background: var(--border2);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 6px var(--glow);
-    cursor: pointer;
-    transition: transform 0.1s;
-  }
-  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
-  /* Preview strip */
-  .preview-strip {
-    height: 18px;
-    border-radius: 4px;
-    background: #050508;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    margin-top: 12px;
-    position: relative;
-  }
-  .preview-inner {
-    display: flex;
-    height: 100%;
-    width: 100%;
-  }
-  .preview-led {
-    flex: 1;
-    height: 100%;
-    background: #000;
-    transition: background 0.05s;
-  }
+  /* Night preview */
+  .night-preview{width:100%;height:130px;border-radius:6px;background:#050810;border:1px solid var(--border);position:relative;overflow:hidden;margin-top:12px}
+  canvas#firefly-canvas{position:absolute;inset:0;width:100%;height:100%}
 
   /* Buttons */
-  .btn-row { display: flex; gap: 10px; margin-top: 1.5rem; }
-  .btn {
-    padding: 11px 20px;
-    border-radius: 5px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.05em;
-    display: flex; align-items: center; gap: 7px;
-  }
-  .btn:hover { background: var(--surface2); border-color: var(--border2); }
-  .btn:active { transform: scale(0.98); }
-  .btn-start {
-    background: rgba(200,232,122,0.08);
-    border-color: var(--accent);
-    color: var(--accent);
-    flex: 1;
-  }
-  .btn-start:hover { background: rgba(200,232,122,0.15); }
-  .btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-stop {
-    border-color: rgba(232,122,122,0.4);
-    color: var(--danger);
-  }
-  .btn-stop:hover { background: rgba(232,122,122,0.08); }
-  .btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  /* Test btn */
-  .btn-sm {
-    padding: 9px 14px;
-    border-radius: 5px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .btn-sm:hover { color: var(--text); background: var(--surface2); }
-
-  /* Firefly canvas preview */
-  .night-preview {
-    width: 100%;
-    height: 140px;
-    border-radius: 6px;
-    background: #050810;
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-    margin-top: 12px;
-  }
-  canvas#firefly-canvas {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-  }
+  .btn-row{display:flex;gap:10px;margin-top:1.5rem}
+  .btn{padding:12px 20px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;transition:all .15s;letter-spacing:.05em;display:flex;align-items:center;gap:7px}
+  .btn:hover{background:var(--surface2)}
+  .btn:active{transform:scale(.98)}
+  .btn-start{background:rgba(200,232,122,.08);border-color:var(--accent);color:var(--accent);flex:1;font-size:14px}
+  .btn-start:hover{background:rgba(200,232,122,.16)}
+  .btn-start:disabled{opacity:.35;cursor:not-allowed}
+  .btn-stop{border-color:rgba(232,122,122,.4);color:var(--danger)}
+  .btn-stop:hover{background:rgba(232,122,122,.08)}
+  .btn-sm{padding:7px 12px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn-sm:hover{color:var(--text);background:var(--surface2)}
+  .btn-sm.accent{border-color:var(--accent);color:var(--accent)}
+  .btn-sm.accent:hover{background:rgba(200,232,122,.08)}
 </style>
 </head>
 <body>
-
-<div class="sky"></div>
 <canvas class="stars" id="stars"></canvas>
-
 <div class="layout">
 
   <header>
@@ -336,41 +133,62 @@
 
   <div class="statusbar">
     <div class="dot" id="dot"></div>
-    <span id="status-text">idle — enter IP to begin</span>
+    <span id="status-text">loading…</span>
   </div>
 
-  <!-- Device -->
+  <!-- Controllers -->
   <div class="section">
-    <div class="section-header">WLED Device</div>
+    <div class="section-header">
+      <span>WLED Controllers</span>
+      <button class="btn-sm accent" onclick="toggleAddForm()">+ add</button>
+    </div>
     <div class="section-body">
-      <div class="ip-row">
-        <input type="text" id="wled-ip" placeholder="192.168.1.42" autocomplete="off" spellcheck="false">
-        <button class="btn-sm" onclick="testConn()">ping</button>
+      <div class="controllers-list" id="controllers-list">
+        <div class="no-controllers">no controllers saved yet</div>
       </div>
-      <div class="leds-row">
-        <label>LED count</label>
-        <input type="number" id="n-leds" value="60" min="10" max="1000">
+
+      <!-- Add / Edit form -->
+      <div class="add-form" id="add-form">
+        <div class="form-row">
+          <div class="form-field" style="flex:2">
+            <label>Name</label>
+            <input type="text" id="f-name" placeholder="Living Room">
+          </div>
+          <div class="form-field" style="flex:2">
+            <label>IP Address</label>
+            <input type="text" id="f-ip" placeholder="192.168.1.42" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="form-field" style="flex:1">
+            <label>LED Count</label>
+            <input type="number" id="f-leds" value="60" min="10" max="2000">
+          </div>
+        </div>
+        <div class="ping-result" id="ping-result"></div>
+        <div class="form-btns">
+          <button class="btn-sm" onclick="pingForm()">ping</button>
+          <button class="btn-sm accent" id="save-btn" onclick="saveController()">save</button>
+          <button class="btn-sm" onclick="cancelForm()">cancel</button>
+        </div>
       </div>
-      <div class="test-result" id="test-result"></div>
     </div>
   </div>
 
   <!-- Species -->
   <div class="section">
-    <div class="section-header">Species</div>
+    <div class="section-header"><span>Species</span></div>
     <div class="section-body">
       <div class="species-grid">
-        <button class="species-pill active" data-species="pyralis" onclick="selectSpecies('pyralis',this)">
+        <button class="species-pill active" onclick="selectSpecies('pyralis',this)">
           <span class="sp-name">Big Dipper</span>
           <span class="sp-latin">P. pyralis</span>
           <span class="sp-detail">0.3s · 5.5s interval</span>
         </button>
-        <button class="species-pill" data-species="carolinus" onclick="selectSpecies('carolinus',this)">
+        <button class="species-pill" onclick="selectSpecies('carolinus',this)">
           <span class="sp-name">Synchronous</span>
           <span class="sp-latin">P. carolinus</span>
           <span class="sp-detail">0.5s · synced bursts</span>
         </button>
-        <button class="species-pill" data-species="marginellus" onclick="selectSpecies('marginellus',this)">
+        <button class="species-pill" onclick="selectSpecies('marginellus',this)">
           <span class="sp-name">Quick Flash</span>
           <span class="sp-latin">P. marginellus</span>
           <span class="sp-detail">0.2s · 3s interval</span>
@@ -381,287 +199,272 @@
 
   <!-- Parameters -->
   <div class="section">
-    <div class="section-header">Parameters</div>
+    <div class="section-header"><span>Parameters</span></div>
     <div class="section-body">
       <div class="params-grid">
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">FIREFLY COUNT</span>
-            <span class="param-value" id="v-n_flies">8</span>
-          </div>
-          <input type="range" id="s-n_flies" min="1" max="30" step="1" value="8" oninput="sliderChange('n_flies',this.value)">
+          <div class="param-header"><span class="param-label">FIREFLY COUNT</span><span class="param-value" id="v-n_flies">8</span></div>
+          <input type="range" id="s-n_flies" min="1" max="30" step="1" value="8" oninput="sliderChange('n_flies',this.value,0)">
         </div>
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">FLASH DURATION (s)</span>
-            <span class="param-value" id="v-flash_dur">0.30</span>
-          </div>
+          <div class="param-header"><span class="param-label">FLASH DURATION (s)</span><span class="param-value" id="v-flash_dur">0.30</span></div>
           <input type="range" id="s-flash_dur" min="0.08" max="0.8" step="0.01" value="0.30" oninput="sliderChange('flash_dur',this.value,2)">
         </div>
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">INTERVAL (s)</span>
-            <span class="param-value" id="v-interval">5.5</span>
-          </div>
+          <div class="param-header"><span class="param-label">INTERVAL (s)</span><span class="param-value" id="v-interval">5.5</span></div>
           <input type="range" id="s-interval" min="0.3" max="20" step="0.1" value="5.5" oninput="sliderChange('interval',this.value,1)">
         </div>
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">JITTER (s)</span>
-            <span class="param-value" id="v-jitter">1.2</span>
-          </div>
+          <div class="param-header"><span class="param-label">JITTER (s)</span><span class="param-value" id="v-jitter">1.2</span></div>
           <input type="range" id="s-jitter" min="0" max="5" step="0.1" value="1.2" oninput="sliderChange('jitter',this.value,1)">
         </div>
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">RISE SHARPNESS (γ)</span>
-            <span class="param-value" id="v-gamma">4.0</span>
-          </div>
-          <input type="range" id="s-gamma" min="1" max="10" step="0.5" value="4.0" oninput="sliderChange('gamma',this.value,1)">
+          <div class="param-header"><span class="param-label">RISE SHARPNESS (γ)</span><span class="param-value" id="v-gamma">4.0</span></div>
+          <input type="range" id="s-gamma" min="1" max="10" step="0.5" value="4" oninput="sliderChange('gamma',this.value,1)">
         </div>
         <div class="param">
-          <div class="param-header">
-            <span class="param-label">COUPLING</span>
-            <span class="param-value" id="v-coupling">0.10</span>
-          </div>
+          <div class="param-header"><span class="param-label">COUPLING</span><span class="param-value" id="v-coupling">0.10</span></div>
           <input type="range" id="s-coupling" min="0" max="1" step="0.05" value="0.1" oninput="sliderChange('coupling',this.value,2)">
         </div>
-        <div class="param" style="grid-column: 1/-1">
-          <div class="param-header">
-            <span class="param-label">FLASH HUE</span>
-            <span class="param-value" id="v-hue">65°</span>
-          </div>
+        <div class="param" style="grid-column:1/-1">
+          <div class="param-header"><span class="param-label">FLASH HUE</span><span class="param-value" id="v-hue">65°</span></div>
           <input type="range" id="s-hue" min="40" max="120" step="1" value="65" oninput="sliderChange('hue',this.value,0,'°')">
         </div>
       </div>
-
-      <!-- Mini canvas preview -->
-      <div class="night-preview">
-        <canvas id="firefly-canvas"></canvas>
-      </div>
+      <div class="night-preview"><canvas id="firefly-canvas"></canvas></div>
     </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-start" id="btn-start" onclick="startEffect()">
-      ▶ start effect
-    </button>
-    <button class="btn btn-stop" id="btn-stop" onclick="stopEffect()">
-      ■ stop
-    </button>
+    <button class="btn btn-start" id="btn-start" onclick="startEffect()">▶ start effect</button>
+    <button class="btn btn-stop" onclick="stopEffect()">■ stop</button>
   </div>
 
 </div>
-
 <script>
-// ── Stars ────────────────────────────────────────────────────
+// Stars
 (function(){
-  const c = document.getElementById('stars');
-  const ctx = c.getContext('2d');
-  function resize(){ c.width = innerWidth; c.height = innerHeight; draw(); }
-  function draw(){
-    ctx.clearRect(0,0,c.width,c.height);
-    for(let i=0;i<180;i++){
-      const x=Math.random()*c.width, y=Math.random()*c.height;
-      const r=Math.random()*0.8+0.2;
-      const a=Math.random()*0.5+0.1;
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,240,${a})`; ctx.fill();
-    }
-  }
-  window.addEventListener('resize', resize);
-  resize();
+  const c=document.getElementById('stars'),ctx=c.getContext('2d');
+  function draw(){c.width=innerWidth;c.height=innerHeight;for(let i=0;i<200;i++){const x=Math.random()*c.width,y=Math.random()*c.height,r=Math.random()*.8+.1,a=Math.random()*.5+.1;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,240,${a})`;ctx.fill();}}
+  window.addEventListener('resize',draw);draw();
 })();
 
-// ── Params state ─────────────────────────────────────────────
-const params = { n_flies:8, flash_dur:0.30, interval:5.5, jitter:1.2, gamma:4.0, coupling:0.10, hue:65 };
-const SPECIES = {
-  pyralis:     { n_flies:8,  flash_dur:0.30, interval:5.5, jitter:1.2, gamma:4.0, coupling:0.10, hue:65 },
-  carolinus:   { n_flies:16, flash_dur:0.50, interval:0.5, jitter:0.3, gamma:6.0, coupling:0.85, hue:55 },
-  marginellus: { n_flies:6,  flash_dur:0.20, interval:3.0, jitter:0.8, gamma:5.0, coupling:0.15, hue:75 },
+// ── State ─────────────────────────────────────────────────────
+const params={n_flies:8,flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65};
+const SPECIES={
+  pyralis:    {n_flies:8, flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65},
+  carolinus:  {n_flies:16,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55},
+  marginellus:{n_flies:6, flash_dur:.20,interval:3.0,jitter:.8, gamma:5.0,coupling:.15,hue:75},
 };
-let selectedSpecies = 'pyralis';
+let selectedSpecies='pyralis';
+let selectedControllerId=null;
+let editingId=null;
+let cachedControllers={};
+let serverStatus={};
 
-function sliderChange(k, v, dec=1, suffix='') {
-  const num = parseFloat(v);
-  params[k] = num;
-  document.getElementById('v-'+k).textContent = num.toFixed(dec) + suffix;
-  respawnFlies();
+// ── Controllers UI ────────────────────────────────────────────
+function renderControllers(data){
+  cachedControllers=data;
+  const list=document.getElementById('controllers-list');
+  const ids=Object.keys(data);
+  if(!ids.length){list.innerHTML='<div class="no-controllers">no controllers saved yet — click + add</div>';return;}
+  list.innerHTML=ids.map(id=>{
+    const c=data[id];
+    const isRunning=serverStatus.running&&serverStatus.active_controller===id;
+    const isSelected=selectedControllerId===id;
+    return `<div class="controller-card${isRunning?' running':''}${isSelected?' active':''}" onclick="selectController('${id}')">
+      <div class="cc-dot"></div>
+      <div class="cc-info">
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-meta">${c.ip} · ${c.n_leds} LEDs${isRunning?' · <span style="color:var(--accent)">running</span>':''}</div>
+      </div>
+      <div class="cc-actions" onclick="event.stopPropagation()">
+        <button class="icon-btn" onclick="editController('${id}')">edit</button>
+        <button class="icon-btn danger" onclick="deleteController('${id}')">del</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Update start button
+  document.getElementById('btn-start').disabled=!selectedControllerId;
 }
 
-function selectSpecies(sp, el) {
-  selectedSpecies = sp;
-  document.querySelectorAll('.species-pill').forEach(b => b.classList.remove('active'));
+function selectController(id){
+  selectedControllerId=id;
+  renderControllers(cachedControllers);
+}
+
+async function loadControllers(){
+  try{
+    const r=await fetch('/api/controllers');
+    const d=await r.json();
+    renderControllers(d);
+  }catch(e){}
+}
+
+// ── Add / Edit form ───────────────────────────────────────────
+function toggleAddForm(){
+  editingId=null;
+  document.getElementById('f-name').value='';
+  document.getElementById('f-ip').value='';
+  document.getElementById('f-leds').value='60';
+  document.getElementById('ping-result').textContent='';
+  document.getElementById('ping-result').className='ping-result';
+  document.getElementById('save-btn').textContent='save';
+  const f=document.getElementById('add-form');
+  f.classList.toggle('open');
+}
+
+function editController(id){
+  const c=cachedControllers[id];
+  if(!c)return;
+  editingId=id;
+  document.getElementById('f-name').value=c.name;
+  document.getElementById('f-ip').value=c.ip;
+  document.getElementById('f-leds').value=c.n_leds;
+  document.getElementById('ping-result').textContent='';
+  document.getElementById('ping-result').className='ping-result';
+  document.getElementById('save-btn').textContent='update';
+  document.getElementById('add-form').classList.add('open');
+}
+
+function cancelForm(){
+  editingId=null;
+  document.getElementById('add-form').classList.remove('open');
+}
+
+async function saveController(){
+  const name=document.getElementById('f-name').value.trim();
+  const ip=document.getElementById('f-ip').value.trim();
+  const leds=parseInt(document.getElementById('f-leds').value)||60;
+  if(!name||!ip){document.getElementById('ping-result').textContent='name and IP are required';document.getElementById('ping-result').className='ping-result err';return;}
+  try{
+    let r;
+    if(editingId){
+      r=await fetch(`/api/controllers/${editingId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,ip,n_leds:leds})});
+    }else{
+      r=await fetch('/api/controllers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,ip,n_leds:leds})});
+    }
+    const d=await r.json();
+    if(d.ok){
+      cancelForm();
+      if(!editingId&&d.id)selectedControllerId=d.id;
+      await loadControllers();
+    }else{
+      document.getElementById('ping-result').textContent='✗ '+d.error;
+      document.getElementById('ping-result').className='ping-result err';
+    }
+  }catch(e){document.getElementById('ping-result').textContent='✗ request failed';document.getElementById('ping-result').className='ping-result err';}
+}
+
+async function deleteController(id){
+  if(!confirm(`Delete "${cachedControllers[id]?.name}"?`))return;
+  try{
+    await fetch(`/api/controllers/${id}`,{method:'DELETE'});
+    if(selectedControllerId===id)selectedControllerId=null;
+    await loadControllers();
+  }catch(e){}
+}
+
+async function pingForm(){
+  const ip=document.getElementById('f-ip').value.trim();
+  const el=document.getElementById('ping-result');
+  if(!ip){el.textContent='enter an IP first';el.className='ping-result err';return;}
+  el.textContent='pinging…';el.className='ping-result';
+  try{
+    const r=await fetch('/api/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wled_ip:ip})});
+    const d=await r.json();
+    if(d.ok){el.textContent=`✓ ${d.name} · v${d.version}`;el.className='ping-result ok';}
+    else{el.textContent='✗ '+d.error;el.className='ping-result err';}
+  }catch(e){el.textContent='✗ failed';el.className='ping-result err';}
+}
+
+// ── Species & params ──────────────────────────────────────────
+function sliderChange(k,v,dec,suffix=''){
+  params[k]=parseFloat(v);
+  document.getElementById('v-'+k).textContent=parseFloat(v).toFixed(dec)+suffix;
+  respawnFlies();
+}
+function selectSpecies(sp,el){
+  selectedSpecies=sp;
+  document.querySelectorAll('.species-pill').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  const s = SPECIES[sp];
-  for (const [k, v] of Object.entries(s)) {
-    params[k] = v;
-    const slider = document.getElementById('s-'+k);
-    const valEl  = document.getElementById('v-'+k);
-    if (!slider) continue;
-    slider.value = v;
-    const dec = k==='coupling'?2:k==='flash_dur'?2:k==='n_flies'?0:1;
-    const suf = k==='hue'?'°':'';
-    valEl.textContent = parseFloat(v).toFixed(dec) + suf;
+  const s=SPECIES[sp];
+  for(const[k,v]of Object.entries(s)){
+    params[k]=v;
+    const sl=document.getElementById('s-'+k);
+    const vl=document.getElementById('v-'+k);
+    if(!sl)continue;
+    sl.value=v;
+    const dec=k==='coupling'?2:k==='flash_dur'?2:k==='n_flies'?0:1;
+    vl.textContent=parseFloat(v).toFixed(dec)+(k==='hue'?'°':'');
   }
   respawnFlies();
 }
 
-// ── Preview canvas ────────────────────────────────────────────
-const canvas = document.getElementById('firefly-canvas');
-const ctx2   = canvas.getContext('2d');
-let flies = [], rafId;
-
-function hsl2rgba(h, s, l, a) {
-  s/=100; l/=100;
-  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
-  let r,g,b;
-  if(h<60){r=c;g=x;b=0}else if(h<120){r=x;g=c;b=0}else{r=0;g=c;b=x}
-  return `rgba(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)},${a})`;
-}
-
-function flashIntensity(t, dur, gamma) {
-  const dt = t / dur;
-  if (dt < 0) return 0;
-  if (dt < 0.15) return 1/(1+Math.exp(-gamma*(dt/0.15-0.85)));
-  return Math.exp(-Math.pow((dt-0.15)*gamma*0.5,2));
-}
-
-class PreviewFly {
-  constructor() {
-    this.x = 5 + Math.random()*90;
-    this.y = 10 + Math.random()*80;
-    this.vx = (Math.random()-0.5)*0.015;
-    this.vy = (Math.random()-0.5)*0.01;
-    this.nextFlash = performance.now() + Math.random()*(params.interval*1000+params.jitter*1000);
-    this.flashStart = null;
+// ── Canvas preview ────────────────────────────────────────────
+const canvas=document.getElementById('firefly-canvas');
+const ctx2=canvas.getContext('2d');
+let flies=[];
+function hsl2rgba(h,s,l,a){s/=100;l/=100;const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r,g,b;if(h<60){r=c;g=x;b=0}else if(h<120){r=x;g=c;b=0}else{r=0;g=c;b=x}return`rgba(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)},${a})`}
+function flashIntensity(t,dur,gamma){const dt=t/dur;if(dt<0)return 0;if(dt<.15)return 1/(1+Math.exp(-gamma*(dt/.15-.85)));return Math.exp(-Math.pow((dt-.15)*gamma*.5,2))}
+class Fly{constructor(){this.x=5+Math.random()*90;this.y=10+Math.random()*80;this.vx=(Math.random()-.5)*.015;this.vy=(Math.random()-.5)*.01;this.nextFlash=performance.now()+Math.random()*(params.interval*1000+params.jitter*1000);this.flashStart=null}}
+function respawnFlies(){flies=Array.from({length:params.n_flies},()=>new Fly())}
+function drawFrame(now){
+  requestAnimationFrame(drawFrame);
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  ctx2.clearRect(0,0,canvas.width,canvas.height);
+  for(const f of flies){
+    f.x+=f.vx;f.y+=f.vy;
+    if(f.x<2||f.x>98)f.vx*=-1;if(f.y<5||f.y>95)f.vy*=-1;
+    if(!f.flashStart&&now>=f.nextFlash){f.flashStart=now;if(params.coupling>0)for(const o of flies){if(o===f||o.flashStart)continue;const dist=Math.hypot(f.x-o.x,f.y-o.y);const infl=params.coupling*Math.max(0,1-dist/50);if(infl>0)o.nextFlash=Math.max(o.nextFlash-infl*2000,now+50);}}
+    let b=0;if(f.flashStart){const t=now-f.flashStart;b=flashIntensity(t,params.flash_dur*1000,params.gamma);if(t>params.flash_dur*1000*3){f.flashStart=null;f.nextFlash=now+params.interval*1000+(Math.random()-.5)*params.jitter*2000;b=0;}}
+    if(b>.01){const cx=f.x/100*canvas.width,cy=f.y/100*canvas.height,rad=3+b*10;const g=ctx2.createRadialGradient(cx,cy,0,cx,cy,rad*2.5);g.addColorStop(0,hsl2rgba(params.hue,90,75,b));g.addColorStop(.4,hsl2rgba(params.hue,85,55,b*.6));g.addColorStop(1,hsl2rgba(params.hue,80,40,0));ctx2.beginPath();ctx2.arc(cx,cy,rad*2.5,0,Math.PI*2);ctx2.fillStyle=g;ctx2.fill();}
   }
 }
+respawnFlies();requestAnimationFrame(drawFrame);
 
-function respawnFlies() {
-  flies = Array.from({length: params.n_flies}, () => new PreviewFly());
+// ── Start / Stop ──────────────────────────────────────────────
+async function startEffect(){
+  if(!selectedControllerId){setStatus('select a controller first','err');return;}
+  const body={controller_id:selectedControllerId,species:selectedSpecies,...params};
+  try{
+    const r=await fetch('/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.ok)setRunning(true,selectedControllerId);
+    else setStatus('error: '+d.error,'err');
+  }catch(e){setStatus('failed to reach server','err');}
+}
+async function stopEffect(){
+  try{await fetch('/api/stop',{method:'POST'});setRunning(false);}catch(e){}
+}
+function setRunning(on,cid){
+  document.getElementById('dot').className='dot'+(on?' on':'');
+  const name=cid&&cachedControllers[cid]?cachedControllers[cid].name:'device';
+  document.getElementById('status-text').textContent=on?`transmitting to ${name} · ${params.n_flies} fireflies`:'idle';
+}
+function setStatus(msg,cls=''){
+  document.getElementById('status-text').textContent=msg;
+  document.getElementById('dot').className='dot'+(cls?' '+cls:'');
 }
 
-function resizeCanvas() {
-  canvas.width  = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+// ── Poll ──────────────────────────────────────────────────────
+async function poll(){
+  try{
+    const r=await fetch('/api/status');
+    const d=await r.json();
+    serverStatus=d;
+    renderControllers(cachedControllers);
+    if(d.running)setRunning(true,d.active_controller);
+    else if(!d.running&&document.getElementById('dot').className.includes('on'))setRunning(false);
+    if(d.last_error&&d.running)setStatus('error: '+d.last_error,'err');
+  }catch(e){}
 }
 
-function drawFrame(now) {
-  rafId = requestAnimationFrame(drawFrame);
-  resizeCanvas();
-  ctx2.clearRect(0, 0, canvas.width, canvas.height);
-
-  for (const f of flies) {
-    f.x += f.vx; f.y += f.vy;
-    if (f.x<2||f.x>98) f.vx*=-1;
-    if (f.y<5||f.y>95) f.vy*=-1;
-
-    if (!f.flashStart && now >= f.nextFlash) {
-      f.flashStart = now;
-      // coupling nudge
-      if (params.coupling > 0) {
-        for (const o of flies) {
-          if (o===f||o.flashStart) continue;
-          const dist = Math.hypot(f.x-o.x, f.y-o.y);
-          const infl = params.coupling * Math.max(0, 1-dist/50);
-          if (infl>0) o.nextFlash = Math.max(o.nextFlash - infl*2000, now+50);
-        }
-      }
-    }
-
-    let b = 0;
-    if (f.flashStart) {
-      const t = now - f.flashStart;
-      b = flashIntensity(t, params.flash_dur*1000, params.gamma);
-      if (t > params.flash_dur*1000*3) {
-        f.flashStart = null;
-        f.nextFlash = now + params.interval*1000 + (Math.random()-0.5)*params.jitter*2000;
-        b = 0;
-      }
-    }
-
-    if (b > 0.01) {
-      const cx = f.x/100*canvas.width;
-      const cy = f.y/100*canvas.height;
-      const radius = 3 + b*10;
-      const grd = ctx2.createRadialGradient(cx,cy,0,cx,cy,radius*2.5);
-      grd.addColorStop(0, hsl2rgba(params.hue, 90, 75, b));
-      grd.addColorStop(0.4, hsl2rgba(params.hue, 85, 55, b*0.6));
-      grd.addColorStop(1, hsl2rgba(params.hue, 80, 40, 0));
-      ctx2.beginPath();
-      ctx2.arc(cx, cy, radius*2.5, 0, Math.PI*2);
-      ctx2.fillStyle = grd;
-      ctx2.fill();
-    }
-  }
-}
-
-respawnFlies();
-rafId = requestAnimationFrame(drawFrame);
-
-// ── API calls ─────────────────────────────────────────────────
-async function testConn() {
-  const ip = document.getElementById('wled-ip').value.trim();
-  const el = document.getElementById('test-result');
-  if (!ip) { el.textContent = 'enter an IP first'; el.className='test-result err'; return; }
-  el.textContent = 'pinging…'; el.className = 'test-result';
-  try {
-    const r = await fetch('/api/test', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wled_ip:ip})});
-    const d = await r.json();
-    if (d.ok) { el.textContent = `✓ ${d.name} · v${d.version}`; el.className='test-result ok'; }
-    else { el.textContent = `✗ ${d.error}`; el.className='test-result err'; }
-  } catch(e) { el.textContent = '✗ request failed'; el.className='test-result err'; }
-}
-
-async function startEffect() {
-  const ip = document.getElementById('wled-ip').value.trim();
-  if (!ip) { document.getElementById('test-result').textContent='enter IP first'; document.getElementById('test-result').className='test-result err'; return; }
-  const body = {
-    wled_ip: ip,
-    species: selectedSpecies,
-    n_leds: parseInt(document.getElementById('n-leds').value) || 60,
-    ...params
-  };
-  try {
-    const r = await fetch('/api/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const d = await r.json();
-    if (d.ok) { setRunning(true); }
-    else { setStatus('error: '+d.error, 'err'); }
-  } catch(e) { setStatus('failed to start','err'); }
-}
-
-async function stopEffect() {
-  try {
-    await fetch('/api/stop',{method:'POST'});
-    setRunning(false);
-  } catch(e) {}
-}
-
-function setRunning(on) {
-  const dot = document.getElementById('dot');
-  dot.className = 'dot' + (on?' on':'');
-  document.getElementById('status-text').textContent = on
-    ? `transmitting to ${document.getElementById('wled-ip').value} · ${params.n_flies} fireflies`
-    : 'idle';
-}
-
-function setStatus(msg, cls='') {
-  document.getElementById('status-text').textContent = msg;
-  document.getElementById('dot').className = 'dot'+(cls?' '+cls:'');
-}
-
-// Poll status
-setInterval(async () => {
-  try {
-    const r = await fetch('/api/status');
-    const d = await r.json();
-    if (d.running) {
-      setRunning(true);
-      if (d.last_error) setStatus('error: '+d.last_error, 'err');
-    }
-  } catch(e) {}
-}, 3000);
+// Init
+document.getElementById('btn-start').disabled=true;
+loadControllers();
+setInterval(poll,3000);
+poll();
 </script>
 </body>
 </html>

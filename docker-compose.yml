@@ -4,4 +4,9 @@ services:
     ports:
       - "5000:5000"
     restart: unless-stopped
-    network_mode: host   # needed so the container can reach WLED on your LAN
+    network_mode: host
+    volumes:
+      - firefly-data:/data
+
+volumes:
+  firefly-data:

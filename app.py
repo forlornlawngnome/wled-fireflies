@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
 Firefly WLED Controller — Flask backend
+Supports multiple named WLED controllers, persisted to disk.
 """
-import time, math, random, threading, requests
+import time, math, random, threading, requests, json, os
 from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
+DATA_FILE = "/data/controllers.json"
+
 # ── Simulation state ──────────────────────────────────────────
 state = {
     "running": False,
+    "active_controller": None,   # id of currently active controller
     "wled_ip": "",
     "n_leds": 60,
     "n_flies": 8,
@@ -31,6 +35,26 @@ SPECIES = {
 
 sim_thread = None
 stop_event = threading.Event()
+
+# ── Persistent controller storage ─────────────────────────────
+
+def load_controllers():
+    try:
+        os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+        with open(DATA_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def save_controllers(controllers):
+    try:
+        os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+        with open(DATA_FILE, "w") as f:
+            json.dump(controllers, f, indent=2)
+    except Exception as e:
+        print(f"Failed to save controllers: {e}")
+
+controllers = load_controllers()
 
 # ── Physics ───────────────────────────────────────────────────
 
@@ -89,16 +113,15 @@ class Firefly:
 # ── Simulation loop ───────────────────────────────────────────
 
 def run_simulation():
-    s = state
-    ip       = s["wled_ip"]
-    n_leds   = s["n_leds"]
-    n_flies  = s["n_flies"]
-    flash_dur = s["flash_dur"]
-    interval = s["interval"]
-    jitter   = s["jitter"]
-    gamma    = s["gamma"]
-    coupling = s["coupling"]
-    hue      = s["hue"]
+    ip        = state["wled_ip"]
+    n_leds    = state["n_leds"]
+    n_flies   = state["n_flies"]
+    flash_dur = state["flash_dur"]
+    interval  = state["interval"]
+    jitter    = state["jitter"]
+    gamma     = state["gamma"]
+    coupling  = state["coupling"]
+    hue       = state["hue"]
 
     flies = [Firefly(int(i / n_flies * n_leds), interval, jitter) for i in range(n_flies)]
     url   = f"http://{ip}/json/state"
@@ -144,11 +167,28 @@ def run_simulation():
         elapsed = time.time() - t0
         time.sleep(max(0.0, frame - elapsed))
 
-    # Turn off on exit
     try:
         requests.post(url, json={"on": False}, timeout=1)
     except Exception:
         pass
+
+
+# ── Helpers ───────────────────────────────────────────────────
+
+def stop_sim():
+    global sim_thread
+    stop_event.set()
+    state["running"] = False
+    if sim_thread:
+        sim_thread.join(timeout=2)
+    sim_thread = None
+
+def start_sim():
+    global sim_thread
+    stop_event.clear()
+    state["running"] = True
+    sim_thread = threading.Thread(target=run_simulation, daemon=True)
+    sim_thread.start()
 
 
 # ── API routes ────────────────────────────────────────────────
@@ -161,7 +201,9 @@ def index():
 @app.route("/api/status")
 def api_status():
     return jsonify({
+        "state": "on" if state["running"] else "off",
         "running": state["running"],
+        "active_controller": state["active_controller"],
         "wled_ip": state["wled_ip"],
         "species": state["species"],
         "last_error": state["last_error"],
@@ -169,17 +211,87 @@ def api_status():
     })
 
 
+# ── Controller CRUD ───────────────────────────────────────────
+
+@app.route("/api/controllers", methods=["GET"])
+def api_list_controllers():
+    return jsonify(controllers)
+
+
+@app.route("/api/controllers", methods=["POST"])
+def api_add_controller():
+    data = request.json or {}
+    name = data.get("name", "").strip()
+    ip   = data.get("ip", "").strip()
+    leds = int(data.get("n_leds", 60))
+    if not name or not ip:
+        return jsonify({"ok": False, "error": "name and ip are required"}), 400
+    cid = str(int(time.time() * 1000))
+    controllers[cid] = {"id": cid, "name": name, "ip": ip, "n_leds": leds}
+    save_controllers(controllers)
+    return jsonify({"ok": True, "id": cid, "controller": controllers[cid]})
+
+
+@app.route("/api/controllers/<cid>", methods=["PUT"])
+def api_update_controller(cid):
+    if cid not in controllers:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    data = request.json or {}
+    if "name"   in data: controllers[cid]["name"]   = data["name"].strip()
+    if "ip"     in data: controllers[cid]["ip"]     = data["ip"].strip()
+    if "n_leds" in data: controllers[cid]["n_leds"] = int(data["n_leds"])
+    save_controllers(controllers)
+    return jsonify({"ok": True, "controller": controllers[cid]})
+
+
+@app.route("/api/controllers/<cid>", methods=["DELETE"])
+def api_delete_controller(cid):
+    if cid not in controllers:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    # Stop simulation if this controller is active
+    if state["active_controller"] == cid and state["running"]:
+        stop_sim()
+        state["active_controller"] = None
+    del controllers[cid]
+    save_controllers(controllers)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/controllers/<cid>/ping", methods=["POST"])
+def api_ping_controller(cid):
+    if cid not in controllers:
+        return jsonify({"ok": False, "error": "not found"}), 404
+    ip = controllers[cid]["ip"]
+    try:
+        r = requests.get(f"http://{ip}/json/info", timeout=2)
+        d = r.json()
+        return jsonify({"ok": True, "name": d.get("name","WLED"), "version": d.get("ver","?")})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
+
+
+# ── Start / Stop ──────────────────────────────────────────────
+
 @app.route("/api/start", methods=["POST"])
 def api_start():
-    global sim_thread
     data = request.json or {}
 
-    if not data.get("wled_ip"):
-        return jsonify({"ok": False, "error": "No IP address provided"}), 400
-
-    # Update state
-    state["wled_ip"] = data["wled_ip"]
-    state["n_leds"]  = int(data.get("n_leds", state["n_leds"]))
+    # Can start by controller id or by raw ip
+    cid = data.get("controller_id")
+    if cid:
+        if cid not in controllers:
+            return jsonify({"ok": False, "error": "Controller not found"}), 404
+        c = controllers[cid]
+        state["wled_ip"]           = c["ip"]
+        state["n_leds"]            = c["n_leds"]
+        state["active_controller"] = cid
+    else:
+        ip = data.get("wled_ip", "").strip()
+        if not ip:
+            return jsonify({"ok": False, "error": "No controller_id or wled_ip provided"}), 400
+        state["wled_ip"]           = ip
+        state["n_leds"]            = int(data.get("n_leds", state["n_leds"]))
+        state["active_controller"] = None
 
     sp = data.get("species", state["species"])
     if sp in SPECIES:
@@ -187,32 +299,21 @@ def api_start():
         for k, v in SPECIES[sp].items():
             state[k] = v
 
-    # Allow manual overrides
     for k in ["n_flies","flash_dur","interval","jitter","gamma","coupling","hue"]:
         if k in data:
             state[k] = float(data[k]) if k != "n_flies" else int(data[k])
 
-    # Stop existing
     if state["running"]:
-        stop_event.set()
-        if sim_thread:
-            sim_thread.join(timeout=2)
+        stop_sim()
 
-    stop_event.clear()
-    state["running"] = True
-    sim_thread = threading.Thread(target=run_simulation, daemon=True)
-    sim_thread.start()
-
+    start_sim()
     return jsonify({"ok": True})
 
 
 @app.route("/api/stop", methods=["POST"])
 def api_stop():
-    global sim_thread
-    stop_event.set()
-    state["running"] = False
-    if sim_thread:
-        sim_thread.join(timeout=2)
+    stop_sim()
+    state["active_controller"] = None
     return jsonify({"ok": True})
 
 
