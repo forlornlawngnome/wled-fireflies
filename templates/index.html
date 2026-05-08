@@ -379,6 +379,51 @@
           </div>
         </button>
 
+        <button class="species-pill" onclick="selectSpecies('sabulosus',this)">
+          <span class="sp-name">Tree Blinker ★</span>
+          <span class="sp-latin">P. sabulosus</span>
+          <span class="sp-detail">0.4s · 7s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus sabulosus — Creekside Tree Blinkers</span>
+            Unlike most Photinus, males flash from high up in trees rather than in flight — creating a distinctive overhead twinkling. Named for their preference for creek and stream corridors. Confirmed in NC and throughout the mid-Atlantic and Appalachian states.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.4s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~7s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>AL, DE, IL, KY, MD, MS, NC, NJ, NY, OH, PA, TN, VA, WV, ON</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>creekside trees</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('umbratus',this)">
+          <span class="sp-name">Shaded ★</span>
+          <span class="sp-latin">P. umbratus</span>
+          <span class="sp-detail">0.6s · 9s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus umbratus — Shaded Firefly</span>
+            As the name suggests, males fly in shaded forest interiors rather than open fields — unusual for Photinus. Produces a longer, slower single flash with a leisurely interval. Confirmed in NC and across the coastal plain of the deep south.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.6s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~9s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>AL, FL, GA, LA, MS, NC, SC</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>shaded forest interior</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('greeni',this)">
+          <span class="sp-name">Green's Double</span>
+          <span class="sp-latin">P. greeni</span>
+          <span class="sp-detail">0.3s · 8s · 2-pulse</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus greeni — Green's Firefly</span>
+            A two-flash species with a much longer interpulse gap than P. consanguineus — 1.1 to 1.7 seconds between pulses at 27°C. Females have evolved a unique secondary spermatheca to store sperm separately. The long gap between flashes is a key recognition signal females use to identify their species.
+            <div class="sp-tooltip-row"><span>Flash</span><span>2-pulse, 1.1–1.7s gap</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~8s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern United States</span></div>
+            <div class="sp-tooltip-row"><span>Season</span><span>June–July</span></div>
+          </div>
+        </button>
+
         <button class="species-pill" onclick="selectSpecies('reticulata',this)">
           <span class="sp-name">Blue Ghost ★</span>
           <span class="sp-latin">Phausis reticulata</span>
@@ -402,6 +447,21 @@
   <div class="section">
     <div class="section-header"><span>Parameters</span></div>
     <div class="section-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <span style="font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase">Waveform model</span>
+        </div>
+        <div style="display:flex;gap:0;border:1px solid var(--border2);border-radius:5px;overflow:hidden">
+          <button id="wf-saikia" onclick="setWaveform('saikia')"
+            style="padding:5px 12px;font-size:11px;font-family:inherit;cursor:pointer;border:none;background:rgba(200,232,122,.08);color:var(--accent);letter-spacing:.04em">
+            Saikia &amp; Bora
+          </button>
+          <button id="wf-bezier" onclick="setWaveform('bezier')"
+            style="padding:5px 12px;font-size:11px;font-family:inherit;cursor:pointer;border:none;border-left:1px solid var(--border2);background:transparent;color:var(--muted);letter-spacing:.04em">
+            Bézier (archive)
+          </button>
+        </div>
+      </div>
       <div class="params-grid">
         <div class="param">
           <div class="param-header"><span class="param-label">FIREFLY COUNT</span><span class="param-value" id="v-n_flies">8</span></div>
@@ -424,13 +484,20 @@
           <input type="range" id="s-gamma" min="1" max="10" step="0.5" value="4" oninput="sliderChange('gamma',this.value,1)">
         </div>
         <div class="param">
-          <div class="param-header"><span class="param-label">COUPLING</span><span class="param-value" id="v-coupling">0.10</span></div>
+          <div class="param-header">
+            <span class="param-label">COUPLING</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="param-value" id="v-coupling">0.10</span>
+              <button id="coupling-toggle" onclick="toggleCoupling()" style="font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--accent);background:rgba(200,232,122,.08);color:var(--accent);cursor:pointer;font-family:inherit;letter-spacing:.05em">on</button>
+            </div>
+          </div>
           <input type="range" id="s-coupling" min="0" max="1" step="0.05" value="0.1" oninput="sliderChange('coupling',this.value,2)">
         </div>
         <div class="param" style="grid-column:1/-1">
           <div class="param-header"><span class="param-label">FLASH HUE</span><span class="param-value" id="v-hue">65°</span></div>
           <input type="range" id="s-hue" min="40" max="120" step="1" value="65" oninput="sliderChange('hue',this.value,0,'°')">
         </div>
+      </div>
       </div>
       <div class="night-preview"><canvas id="firefly-canvas"></canvas></div>
     </div>
@@ -462,6 +529,9 @@ const SPECIES={
   carolinus:    {n_flies:16,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55, burst_n:1,burst_gap:0},
   angulata:     {n_flies:5, flash_dur:.60,interval:7.0,jitter:1.5,gamma:3.0,coupling:.05,hue:35, burst_n:1,burst_gap:0},
   reticulata:   {n_flies:5, flash_dur:4.0,interval:5.0,jitter:1.0,gamma:1.0,coupling:.02,hue:165,burst_n:1,burst_gap:0},
+  sabulosus:    {n_flies:6, flash_dur:.42,interval:7.0,jitter:1.5,gamma:6.0,coupling:.08,hue:67, burst_n:1,burst_gap:0},
+  umbratus:     {n_flies:6, flash_dur:.60,interval:9.0,jitter:2.0,gamma:4.5,coupling:.08,hue:64, burst_n:1,burst_gap:0},
+  greeni:       {n_flies:6, flash_dur:.30,interval:8.0,jitter:1.5,gamma:5.0,coupling:.08,hue:68, burst_n:2,burst_gap:1.4},
 };
 let selectedSpecies='pyralis';
 let selectedControllerId=null;
@@ -689,6 +759,52 @@ document.querySelectorAll('.species-pill').forEach(pill => {
     tooltip.style.left = left + 'px';
   });
 });
+
+async function setWaveform(wf) {
+  try {
+    await fetch('/api/waveform', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({waveform:wf})});
+  } catch(e) {}
+  const saikia = document.getElementById('wf-saikia');
+  const bezier = document.getElementById('wf-bezier');
+  if (wf === 'saikia') {
+    saikia.style.background = 'rgba(200,232,122,.08)'; saikia.style.color = 'var(--accent)';
+    bezier.style.background = 'transparent';           bezier.style.color = 'var(--muted)';
+  } else {
+    bezier.style.background = 'rgba(200,232,122,.08)'; bezier.style.color = 'var(--accent)';
+    saikia.style.background = 'transparent';           saikia.style.color = 'var(--muted)';
+  }
+}
+
+let couplingEnabled = true;
+let savedCoupling = 0.10;
+
+function toggleCoupling() {
+  const btn = document.getElementById('coupling-toggle');
+  const slider = document.getElementById('s-coupling');
+  if (couplingEnabled) {
+    savedCoupling = params.coupling;
+    params.coupling = 0;
+    slider.value = 0;
+    document.getElementById('v-coupling').textContent = '0.00';
+    btn.textContent = 'off';
+    btn.style.borderColor = 'var(--muted)';
+    btn.style.color = 'var(--muted)';
+    btn.style.background = 'transparent';
+    slider.disabled = true;
+    slider.style.opacity = '0.35';
+  } else {
+    params.coupling = savedCoupling;
+    slider.value = savedCoupling;
+    document.getElementById('v-coupling').textContent = savedCoupling.toFixed(2);
+    btn.textContent = 'on';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+    btn.style.background = 'rgba(200,232,122,.08)';
+    slider.disabled = false;
+    slider.style.opacity = '1';
+  }
+  couplingEnabled = !couplingEnabled;
+}
 
 function copyId(id, e){
   e.stopPropagation();
