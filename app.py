@@ -179,28 +179,53 @@ def run_simulation():
     udp_port = 21324
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # Tell WLED to enter realtime mode via JSON (timeout=2s, revert after)
-    try:
-        requests.post(url, json={"on": True, "bri": 255, "seg": [{"id": 0, "frz": False}]}, timeout=1)
-        time.sleep(0.1)
-    except Exception:
-        pass
+    def http_keepalive():
+        """Periodically re-assert realtime mode over HTTP in case WLED resets it."""
+        try:
+            requests.post(url, json={"on": True, "bri": 255, "seg": [{"id": 0, "frz": False}]}, timeout=1)
+        except Exception:
+            pass
+
+    # Initial unfreeze
+    http_keepalive()
+    time.sleep(0.1)
+
+    last_keepalive = time.time()
+    KEEPALIVE_INTERVAL = 3.0  # re-assert over HTTP every 3 seconds
 
     while not stop_event.is_set():
         t0  = time.time()
         now = t0
+
+        # Periodic HTTP keepalive to prevent WLED reverting to its own effect
+        if now - last_keepalive >= KEEPALIVE_INTERVAL:
+            threading.Thread(target=http_keepalive, daemon=True).start()
+            last_keepalive = now
 
         for f in flies:
             f.tick(now, flies, interval, jitter, coupling, n_leds)
 
         colors = [[0, 0, 0]] * n_leds
         for f in flies:
-            # For burst species, sum intensity across all pulses in the burst
+            if f.flash_start is None:
+                continue
+
+            # Calculate intensity across all pulses in the burst
             b = 0.0
+            total_burst_dur = burst_n * flash_dur + (burst_n - 1) * burst_gap
+            elapsed = now - f.flash_start
+
+            # Clear flash_start once the full burst (plus tail) is done
+            if elapsed > total_burst_dur + flash_dur * 2:
+                f.flash_start = None
+                continue
+
             for pulse in range(burst_n):
                 pulse_offset = pulse * (flash_dur + burst_gap)
-                t_adjusted = now - f.flash_start - pulse_offset if f.flash_start else -1
-                b = max(b, flash_intensity(t_adjusted, flash_dur, gamma) if f.flash_start and t_adjusted >= 0 else 0.0)
+                t_pulse = elapsed - pulse_offset
+                if t_pulse >= 0:
+                    b = max(b, flash_intensity(t_pulse, flash_dur, gamma))
+
             b = min(1.0, b)
             if b > 0.01:
                 r, g, bl = hsl_to_rgb(hue, 85, int(20 + b * 55))
