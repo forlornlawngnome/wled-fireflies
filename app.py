@@ -13,7 +13,7 @@ DATA_FILE = "/data/controllers.json"
 # ── Simulation state ──────────────────────────────────────────
 state = {
     "running": False,
-    "active_controller": None,   # id of currently active controller
+    "active_controller": None,
     "wled_ip": "",
     "n_leds": 60,
     "n_flies": 8,
@@ -23,14 +23,59 @@ state = {
     "gamma": 4.0,
     "coupling": 0.10,
     "hue": 65,
+    "burst_n": 1,
+    "burst_gap": 0.0,
     "species": "pyralis",
     "last_error": "",
 }
 
 SPECIES = {
-    "pyralis":     {"n_flies":8,  "flash_dur":0.30,"interval":5.5, "jitter":1.2,"gamma":4.0,"coupling":0.10,"hue":65},
-    "carolinus":   {"n_flies":16, "flash_dur":0.50,"interval":0.5, "jitter":0.3,"gamma":6.0,"coupling":0.85,"hue":55},
-    "marginellus": {"n_flies":6,  "flash_dur":0.20,"interval":3.0, "jitter":0.8,"gamma":5.0,"coupling":0.15,"hue":75},
+    # ── Single-flash species ───────────────────────────────────
+    # P. pyralis — Big Dipper, most common Piedmont/Durham species
+    # 0.3s flash, 5.5s interval at 25C (Britannica / Lloyd 1966)
+    "pyralis":      {"n_flies":8,  "flash_dur":0.30,"interval":5.5, "jitter":1.2,"gamma":4.0,"coupling":0.10,"hue":65,  "burst_n":1,"burst_gap":0},
+
+    # P. marginellus — quick hop flash, forest edges
+    # <0.5s flash, 3s interval (Silent Sparks / Lloyd 1966)
+    "marginellus":  {"n_flies":6,  "flash_dur":0.20,"interval":3.0, "jitter":0.8,"gamma":5.0,"coupling":0.15,"hue":70,  "burst_n":1,"burst_gap":0},
+
+    # P. brimleyi — named after NC naturalist, straight fast flight
+    # 0.5s flash, ~5s interval (Lloyd 1966)
+    "brimleyi":     {"n_flies":7,  "flash_dur":0.50,"interval":5.0, "jitter":1.5,"gamma":5.0,"coupling":0.10,"hue":68,  "burst_n":1,"burst_gap":0},
+
+    # P. collustrans — lateral arch flash, ~0.4s (Science Friday / Lloyd)
+    # flashes 3 times per 2-3 second arch cycle
+    "collustrans":  {"n_flies":8,  "flash_dur":0.40,"interval":2.5, "jitter":0.5,"gamma":6.0,"coupling":0.12,"hue":67,  "burst_n":1,"burst_gap":0},
+
+    # P. ignitus — brief precise flash, 0.2s every 5.1s (Lloyd 1966)
+    "ignitus":      {"n_flies":6,  "flash_dur":0.20,"interval":5.1, "jitter":0.8,"gamma":7.0,"coupling":0.08,"hue":63,  "burst_n":1,"burst_gap":0},
+
+    # P. granulatus — rapid 0.5s flash every 2s (Lloyd 1966)
+    "granulatus":   {"n_flies":8,  "flash_dur":0.50,"interval":2.0, "jitter":0.4,"gamma":5.0,"coupling":0.10,"hue":66,  "burst_n":1,"burst_gap":0},
+
+    # ── Double-flash (burst) species ───────────────────────────
+    # P. consanguineus — double pulse, 0.5s gap between pulses (Silent Sparks)
+    "consanguineus":{"n_flies":7,  "flash_dur":0.30,"interval":5.0, "jitter":1.0,"gamma":5.0,"coupling":0.10,"hue":68,  "burst_n":2,"burst_gap":0.5},
+
+    # P. macdermotti — double pulse, 2s gap between pulses (Silent Sparks)
+    "macdermotti":  {"n_flies":6,  "flash_dur":0.30,"interval":6.0, "jitter":1.2,"gamma":5.0,"coupling":0.08,"hue":70,  "burst_n":2,"burst_gap":2.0},
+
+    # P. consimilis — 4-9 quick flashes every 10s (Lloyd 1966)
+    "consimilis":   {"n_flies":6,  "flash_dur":0.15,"interval":10.0,"jitter":2.0,"gamma":6.0,"coupling":0.10,"hue":65,  "burst_n":6,"burst_gap":0.3},
+
+    # ── Synchronizing species ──────────────────────────────────
+    # P. carolinus — synchronous, Great Smoky Mountains NC
+    # 0.5s flash every 0.5s in bursts, 12-14s burst cycle (Copeland & Moiseff)
+    "carolinus":    {"n_flies":16, "flash_dur":0.50,"interval":0.5, "jitter":0.3,"gamma":6.0,"coupling":0.85,"hue":55,  "burst_n":1,"burst_gap":0},
+
+    # ── Amber species ──────────────────────────────────────────
+    # Pyractomena angulata — Candle firefly, amber flicker, 6-8s interval
+    "angulata":     {"n_flies":5,  "flash_dur":0.60,"interval":7.0, "jitter":1.5,"gamma":3.0,"coupling":0.05,"hue":35,  "burst_n":1,"burst_gap":0},
+
+    # ── Continuous glow ────────────────────────────────────────
+    # Phausis reticulata — Blue Ghost, found in Triangle/Durham NC!
+    # Males drift slowly emitting a continuous blue-green glow (no flash)
+    "reticulata":   {"n_flies":5,  "flash_dur":4.00,"interval":5.0, "jitter":1.0,"gamma":1.0,"coupling":0.02,"hue":165, "burst_n":1,"burst_gap":0},
 }
 
 sim_thread = None
@@ -122,6 +167,8 @@ def run_simulation():
     gamma     = state["gamma"]
     coupling  = state["coupling"]
     hue       = state["hue"]
+    burst_n   = int(state.get("burst_n", 1))
+    burst_gap = float(state.get("burst_gap", 0))
 
     flies = [Firefly(int(i / n_flies * n_leds), interval, jitter) for i in range(n_flies)]
     url   = f"http://{ip}/json/state"
@@ -148,7 +195,13 @@ def run_simulation():
 
         colors = [[0, 0, 0]] * n_leds
         for f in flies:
-            b = f.intensity(now, flash_dur, gamma)
+            # For burst species, sum intensity across all pulses in the burst
+            b = 0.0
+            for pulse in range(burst_n):
+                pulse_offset = pulse * (flash_dur + burst_gap)
+                t_adjusted = now - f.flash_start - pulse_offset if f.flash_start else -1
+                b = max(b, flash_intensity(t_adjusted, flash_dur, gamma) if f.flash_start and t_adjusted >= 0 else 0.0)
+            b = min(1.0, b)
             if b > 0.01:
                 r, g, bl = hsl_to_rgb(hue, 85, int(20 + b * 55))
                 r  = int(r  * b)
@@ -312,7 +365,7 @@ def api_start():
         for k, v in SPECIES[sp].items():
             state[k] = v
 
-    for k in ["n_flies","flash_dur","interval","jitter","gamma","coupling","hue"]:
+    for k in ["n_flies","flash_dur","interval","jitter","gamma","coupling","hue","burst_n","burst_gap"]:
         if k in data:
             state[k] = float(data[k]) if k != "n_flies" else int(data[k])
 

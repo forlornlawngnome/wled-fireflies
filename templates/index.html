@@ -27,7 +27,7 @@
   .subtitle{margin-top:.5rem;color:var(--muted);font-size:11px;font-weight:300}
 
   /* Status */
-  .statusbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:2rem;font-size:12px}
+  .statusbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-size:12px}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .4s,box-shadow .4s}
   .dot.on{background:var(--accent);box-shadow:0 0 8px var(--glow);animation:pulse 2s ease-in-out infinite}
   .dot.err{background:var(--danger)}
@@ -79,6 +79,9 @@
   .form-field input::placeholder{color:var(--muted)}
   .form-btns{display:flex;gap:6px;margin-top:10px}
   .ping-result{font-size:11px;margin-top:6px;min-height:16px;color:var(--muted)}
+  .cc-id{font-size:10px;color:var(--muted);margin-top:2px;cursor:pointer;opacity:.5;transition:opacity .15s;font-family:var(--font-mono, monospace)}
+  .cc-id:hover{opacity:1}
+  .copy-hint{color:var(--accent);margin-left:4px;font-size:10px}
   .ping-result.ok{color:var(--accent2)}
   .ping-result.err{color:var(--danger)}
 
@@ -90,6 +93,38 @@
   .sp-name{font-weight:500;display:block;margin-bottom:2px}
   .sp-latin{font-style:italic;font-size:10px;opacity:.7;display:block}
   .sp-detail{font-size:10px;margin-top:4px;opacity:.6;display:block}
+  .species-pill{position:relative}
+  .sp-tooltip{
+    display:none;
+    position:absolute;
+    bottom:calc(100% + 8px);
+    left:50%;
+    transform:translateX(-50%);
+    width:220px;
+    background:#0d0f1a;
+    border:1px solid rgba(200,232,122,.25);
+    border-radius:6px;
+    padding:10px 12px;
+    font-size:11px;
+    line-height:1.6;
+    color:var(--text);
+    text-align:left;
+    z-index:100;
+    pointer-events:none;
+    box-shadow:0 4px 24px rgba(0,0,0,.6);
+  }
+  .sp-tooltip::after{
+    content:'';
+    position:absolute;
+    top:100%;left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:#0d0f1a;
+  }
+  .species-pill:hover .sp-tooltip{display:block}
+  .sp-tooltip-title{font-weight:500;color:var(--accent);margin-bottom:4px;display:block}
+  .sp-tooltip-row{display:flex;justify-content:space-between;gap:8px;border-top:1px solid rgba(255,255,255,.06);padding-top:3px;margin-top:3px}
+  .sp-tooltip-row span:first-child{color:var(--muted)}
 
   /* Params */
   .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
@@ -106,7 +141,7 @@
   canvas#firefly-canvas{position:absolute;inset:0;width:100%;height:100%}
 
   /* Buttons */
-  .btn-row{display:flex;gap:10px;margin-top:1.5rem}
+  .btn-row{display:flex;gap:10px;margin-top:0}
   .btn{padding:12px 20px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;transition:all .15s;letter-spacing:.05em;display:flex;align-items:center;gap:7px}
   .btn:hover{background:var(--surface2)}
   .btn:active{transform:scale(.98)}
@@ -130,11 +165,6 @@
     <h1>Fire<em>fly</em></h1>
     <p class="subtitle">Photinus pyralis flash model · Saikia & Bora nonlinear waveform · Kuramoto coupling</p>
   </header>
-
-  <div class="statusbar">
-    <div class="dot" id="dot"></div>
-    <span id="status-text">loading…</span>
-  </div>
 
   <!-- Controllers -->
   <div class="section">
@@ -173,26 +203,208 @@
     </div>
   </div>
 
+  <!-- Control -->
+  <div class="section">
+    <div class="section-header"><span>Control</span></div>
+    <div class="section-body">
+      <div class="statusbar">
+        <div class="dot" id="dot"></div>
+        <span id="status-text">loading…</span>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-start" id="btn-start" onclick="startEffect()">▶ start effect</button>
+        <button class="btn btn-stop" onclick="stopEffect()">■ stop</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Species -->
   <div class="section">
     <div class="section-header"><span>Species</span></div>
     <div class="section-body">
+      <p style="font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">★ Common in Durham / Piedmont NC</p>
       <div class="species-grid">
+
         <button class="species-pill active" onclick="selectSpecies('pyralis',this)">
-          <span class="sp-name">Big Dipper</span>
+          <span class="sp-name">Big Dipper ★</span>
           <span class="sp-latin">P. pyralis</span>
-          <span class="sp-detail">0.3s · 5.5s interval</span>
+          <span class="sp-detail">0.3s · 5.5s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus pyralis — Big Dipper</span>
+            The most common backyard firefly in eastern North America. Males fly in a J-shaped arc, flashing on the upswing. Found in suburban yards, parks, and forest edges from southern Canada to Mexico.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.3s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>5.5s at 25°C</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern half of N. America</span></div>
+            <div class="sp-tooltip-row"><span>Season</span><span>June–August</span></div>
+          </div>
         </button>
+
+        <button class="species-pill" onclick="selectSpecies('collustrans',this)">
+          <span class="sp-name">Lateral Arch ★</span>
+          <span class="sp-latin">P. collustrans</span>
+          <span class="sp-detail">0.4s · 2.5s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus collustrans — Florida Fishhook</span>
+            Males alternate straight flight with lateral arches or sideways loops, flashing during each deviation. Known range is primarily Florida and Georgia — if you're seeing it in Durham, you're in unusual territory for this species.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.4s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~2.5s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>FL, GA (primarily)</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>open fields, edges</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('brimleyi',this)">
+          <span class="sp-name">Brimley's ★</span>
+          <span class="sp-latin">P. brimleyi</span>
+          <span class="sp-detail">0.5s · 5s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus brimleyi — Sidewinder / Brimley's</span>
+            Named after NC naturalist Clement Samuel Brimley. Males flash mid-flight then stop to hover briefly, creating a jagged stop-start flight path. Confirmed in NC, making it genuinely local to Durham.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.5s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>1.5–2.5s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>AL, AR, GA, KY, NC, OK, SC, TN</span></div>
+            <div class="sp-tooltip-row"><span>Season</span><span>late June–August</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('marginellus',this)">
+          <span class="sp-name">Quick Flash</span>
+          <span class="sp-latin">P. marginellus</span>
+          <span class="sp-detail">0.2s · 3s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus marginellus — Little Gray Firefly</span>
+            Widespread across the eastern US and confirmed in NC. Males hop up and down in brush emitting a quick flash at the top of each hop. Females respond in under a second — the fastest female response of any Photinus.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.2s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~3s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern US incl. NC, midwest to Canada</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>forests, edges, roadsides</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('ignitus',this)">
+          <span class="sp-name">Snappy</span>
+          <span class="sp-latin">P. ignitus</span>
+          <span class="sp-detail">0.2s · 5.1s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus ignitus — Snappy Firefly</span>
+            Males fly straight, level, and slowly 1–2 meters above the ground, emitting very brief precise flashes at a remarkably consistent 5.1-second interval. Females have an unusually long 4-second response delay. Range not fully documented but known from eastern US.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.2s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>5.1s precise</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern United States</span></div>
+            <div class="sp-tooltip-row"><span>Flight</span><span>straight, slow, low</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('granulatus',this)">
+          <span class="sp-name">Zigzag</span>
+          <span class="sp-latin">P. granulatus</span>
+          <span class="sp-detail">0.5s · 2s · single</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus granulatus — Zigzag Firefly</span>
+            Flies about 1 meter off the ground, jerking back and forth in rapid zigzag patterns while flashing every 2 seconds. One of the more energetic courtship displays in the genus. Found across the eastern US.
+            <div class="sp-tooltip-row"><span>Flash</span><span>0.5s single</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~2s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern United States</span></div>
+            <div class="sp-tooltip-row"><span>Flight</span><span>zigzag, 1m off ground</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('consanguineus',this)">
+          <span class="sp-name">Double Flash</span>
+          <span class="sp-latin">P. consanguineus</span>
+          <span class="sp-detail">0.3s · 5s · 2-pulse</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus consanguineus — Double Cousin</span>
+            One of several double-pulsed Photinus species. Males bob upward during flight, emitting short flashes at the start and end of each hop. The 0.5s gap between pulses is the key identifier. Very widespread across eastern North America including NC.
+            <div class="sp-tooltip-row"><span>Flash</span><span>2-pulse, 0.5s gap</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~5s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern US incl. NC, Canada (MB, NS, ON)</span></div>
+            <div class="sp-tooltip-row"><span>Flight</span><span>bobbing</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('macdermotti',this)">
+          <span class="sp-name">Slow Double</span>
+          <span class="sp-latin">P. macdermotti</span>
+          <span class="sp-detail">0.3s · 6s · 2-pulse</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus macdermotti — Slow Double</span>
+            Named after firefly expert Frank McDermott. Distinguished from P. consanguineus by its much longer 2-second gap between the two pulses. Males fly straight and slow, 1–5 meters high, rising on the second flash. Found across eastern US including NC.
+            <div class="sp-tooltip-row"><span>Flash</span><span>2-pulse, 2s gap</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~6s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern US (OK to FL to New England)</span></div>
+            <div class="sp-tooltip-row"><span>Flight</span><span>straight, 1–5m high</span></div>
+          </div>
+        </button>
+
+        <button class="species-pill" onclick="selectSpecies('consimilis',this)">
+          <span class="sp-name">Rapid Burst</span>
+          <span class="sp-latin">P. consimilis</span>
+          <span class="sp-detail">0.15s · 10s · 6-pulse</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus consimilis — Cattail Flash-Train</span>
+            A late-evening species with one of the most complex flash patterns in the genus. Males emit 4–9 rapid pulses every 10 seconds, sometimes hovering on the last flash. Data-deficient species — range not fully mapped, but known from eastern US.
+            <div class="sp-tooltip-row"><span>Flash</span><span>4–9 rapid pulses</span></div>
+            <div class="sp-tooltip-row"><span>Interval</span><span>~10s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern United States (data deficient)</span></div>
+            <div class="sp-tooltip-row"><span>Active</span><span>late evening</span></div>
+          </div>
+        </button>
+
         <button class="species-pill" onclick="selectSpecies('carolinus',this)">
           <span class="sp-name">Synchronous</span>
           <span class="sp-latin">P. carolinus</span>
           <span class="sp-detail">0.5s · synced bursts</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Photinus carolinus — Synchronous Firefly</span>
+            The famous synchronous firefly of the NC mountains. Tens of thousands flash in near-perfect unison — so spectacular that viewing requires a lottery at peak sites in Great Smoky Mountains NP. Bursts of 5–8 flashes repeat every 12–14 seconds population-wide.
+            <div class="sp-tooltip-row"><span>Flash</span><span>bursts, fully synced</span></div>
+            <div class="sp-tooltip-row"><span>Cycle</span><span>12–14s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>yellow-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>GA, KY, NC, NY, OH, PA, TN, VA, WV</span></div>
+            <div class="sp-tooltip-row"><span>Season</span><span>late May–mid June</span></div>
+          </div>
         </button>
-        <button class="species-pill" onclick="selectSpecies('marginellus',this)">
-          <span class="sp-name">Quick Flash</span>
-          <span class="sp-latin">P. marginellus</span>
-          <span class="sp-detail">0.2s · 3s interval</span>
+
+        <button class="species-pill" onclick="selectSpecies('angulata',this)">
+          <span class="sp-name">Candle</span>
+          <span class="sp-latin">Pyractomena angulata</span>
+          <span class="sp-detail">0.6s · 7s · amber</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Pyractomena angulata — Candle / Say's Firefly</span>
+            Named after naturalist Thomas Say. State insect of Indiana. Produces warm amber-orange flickers rather than the yellow-green of Photinus. Inhabits woodlands across eastern North America and is confirmed in NC. Also called the Angled Firefly.
+            <div class="sp-tooltip-row"><span>Flash</span><span>amber flicker, 6–8s</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>amber-orange</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>eastern North America incl. NC</span></div>
+            <div class="sp-tooltip-row"><span>Season</span><span>May–mid July</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>woodlands, open fields</span></div>
+          </div>
         </button>
+
+        <button class="species-pill" onclick="selectSpecies('reticulata',this)">
+          <span class="sp-name">Blue Ghost ★</span>
+          <span class="sp-latin">Phausis reticulata</span>
+          <span class="sp-detail">continuous · blue-green</span>
+          <div class="sp-tooltip">
+            <span class="sp-tooltip-title">Phausis reticulata — Blue Ghost</span>
+            Unlike all other species here, males emit a continuous steady blue-green glow as they drift slowly just above the forest floor — no flashing at all. Common in the southern Appalachians; a Piedmont form was recently discovered near Durham and may be a new species.
+            <div class="sp-tooltip-row"><span>Flash</span><span>continuous glow</span></div>
+            <div class="sp-tooltip-row"><span>Color</span><span>blue-green</span></div>
+            <div class="sp-tooltip-row"><span>Range</span><span>S. Appalachians; Piedmont form near Durham ★</span></div>
+            <div class="sp-tooltip-row"><span>Active</span><span>9:30–11pm, late May–June</span></div>
+            <div class="sp-tooltip-row"><span>Habitat</span><span>moist deciduous forest</span></div>
+          </div>
+        </button>
+
       </div>
     </div>
   </div>
@@ -235,10 +447,7 @@
     </div>
   </div>
 
-  <div class="btn-row">
-    <button class="btn btn-start" id="btn-start" onclick="startEffect()">▶ start effect</button>
-    <button class="btn btn-stop" onclick="stopEffect()">■ stop</button>
-  </div>
+
 
 </div>
 <script>
@@ -252,9 +461,18 @@
 // ── State ─────────────────────────────────────────────────────
 const params={n_flies:8,flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65};
 const SPECIES={
-  pyralis:    {n_flies:8, flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65},
-  carolinus:  {n_flies:16,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55},
-  marginellus:{n_flies:6, flash_dur:.20,interval:3.0,jitter:.8, gamma:5.0,coupling:.15,hue:75},
+  pyralis:      {n_flies:8, flash_dur:.30,interval:5.5,jitter:1.2,gamma:4.0,coupling:.10,hue:65, burst_n:1,burst_gap:0},
+  marginellus:  {n_flies:6, flash_dur:.20,interval:3.0,jitter:.8, gamma:5.0,coupling:.15,hue:70, burst_n:1,burst_gap:0},
+  brimleyi:     {n_flies:7, flash_dur:.50,interval:5.0,jitter:1.5,gamma:5.0,coupling:.10,hue:68, burst_n:1,burst_gap:0},
+  collustrans:  {n_flies:8, flash_dur:.40,interval:2.5,jitter:.5, gamma:6.0,coupling:.12,hue:67, burst_n:1,burst_gap:0},
+  ignitus:      {n_flies:6, flash_dur:.20,interval:5.1,jitter:.8, gamma:7.0,coupling:.08,hue:63, burst_n:1,burst_gap:0},
+  granulatus:   {n_flies:8, flash_dur:.50,interval:2.0,jitter:.4, gamma:5.0,coupling:.10,hue:66, burst_n:1,burst_gap:0},
+  consanguineus:{n_flies:7, flash_dur:.30,interval:5.0,jitter:1.0,gamma:5.0,coupling:.10,hue:68, burst_n:2,burst_gap:.5},
+  macdermotti:  {n_flies:6, flash_dur:.30,interval:6.0,jitter:1.2,gamma:5.0,coupling:.08,hue:70, burst_n:2,burst_gap:2.0},
+  consimilis:   {n_flies:6, flash_dur:.15,interval:10.0,jitter:2.0,gamma:6.0,coupling:.10,hue:65,burst_n:6,burst_gap:.3},
+  carolinus:    {n_flies:16,flash_dur:.50,interval:.5, jitter:.3, gamma:6.0,coupling:.85,hue:55, burst_n:1,burst_gap:0},
+  angulata:     {n_flies:5, flash_dur:.60,interval:7.0,jitter:1.5,gamma:3.0,coupling:.05,hue:35, burst_n:1,burst_gap:0},
+  reticulata:   {n_flies:5, flash_dur:4.0,interval:5.0,jitter:1.0,gamma:1.0,coupling:.02,hue:165,burst_n:1,burst_gap:0},
 };
 let selectedSpecies='pyralis';
 let selectedControllerId=null;
@@ -277,6 +495,7 @@ function renderControllers(data){
       <div class="cc-info">
         <div class="cc-name">${c.name}</div>
         <div class="cc-meta">${c.ip} · ${c.n_leds} LEDs${isRunning?' · <span style="color:var(--accent)">running</span>':''}</div>
+        <div class="cc-id" onclick="copyId('${id}', event)" title="click to copy">id: ${id} <span class="copy-hint">copy</span></div>
       </div>
       <div class="cc-actions" onclick="event.stopPropagation()">
         <button class="icon-btn" onclick="editController('${id}')">edit</button>
@@ -398,6 +617,8 @@ function selectSpecies(sp,el){
     const dec=k==='coupling'?2:k==='flash_dur'?2:k==='n_flies'?0:1;
     vl.textContent=parseFloat(v).toFixed(dec)+(k==='hue'?'°':'');
   }
+  params.burst_n=s.burst_n||1;
+  params.burst_gap=s.burst_gap||0;
   respawnFlies();
 }
 
@@ -458,6 +679,16 @@ async function poll(){
     else if(!d.running&&document.getElementById('dot').className.includes('on'))setRunning(false);
     if(d.last_error&&d.running)setStatus('error: '+d.last_error,'err');
   }catch(e){}
+}
+
+function copyId(id, e){
+  e.stopPropagation();
+  navigator.clipboard.writeText(id).then(()=>{
+    const el=e.currentTarget;
+    const orig=el.innerHTML;
+    el.innerHTML=`id: ${id} <span class="copy-hint">✓ copied</span>`;
+    setTimeout(()=>{ el.innerHTML=orig; }, 2000);
+  });
 }
 
 // Init
