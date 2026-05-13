@@ -188,11 +188,19 @@ def flash_intensity(t, dur, gamma):
 
 
 class Firefly:
-    def __init__(self, led_pos, interval, jitter, n_leds):
+    def __init__(self, led_pos, interval, jitter, n_leds, flash_dur, gamma):
         self.led      = float(led_pos)
         self.n_leds   = n_leds
         self.next_flash = time.time() + random.uniform(0, interval + jitter)
         self.flash_start = None
+
+        # Per-individual variation — Lloyd (1966) observed ±15-20% variation
+        # between individuals within the same species on the same evening.
+        # Each firefly gets its own fixed characteristics, like a real insect.
+        self.flash_dur = flash_dur * random.uniform(0.82, 1.18)
+        self.gamma     = gamma     * random.uniform(0.85, 1.15)
+        self.interval  = interval  * random.uniform(0.88, 1.12)
+
         # Drift: random walk along the strip, pauses while flashing
         # Velocity in LEDs per frame at 20fps — min 0.15, max 0.4 so movement is visible
         self.velocity = random.choice([-1, 1]) * random.uniform(0.15, 0.4)
@@ -236,7 +244,7 @@ class Firefly:
                     influence = coupling * max(0.0, 1.0 - dist * 4)
                     if influence > 0:
                         o.next_flash -= influence * interval * 0.3
-            self.next_flash = now + interval + random.uniform(-jitter, jitter)
+            self.next_flash = now + self.interval + random.uniform(-jitter, jitter)
 
 
 # ── Simulation loop ───────────────────────────────────────────
@@ -254,7 +262,7 @@ def run_simulation():
     burst_n   = int(state.get("burst_n", 1))
     burst_gap = float(state.get("burst_gap", 0))
 
-    flies = [Firefly(int(i / n_flies * n_leds), interval, jitter, n_leds) for i in range(n_flies)]
+    flies = [Firefly(int(i / n_flies * n_leds), interval, jitter, n_leds, flash_dur, gamma) for i in range(n_flies)]
     url   = f"http://{ip}/json/state"
     frame = 0.05
 
@@ -295,20 +303,21 @@ def run_simulation():
                 continue
 
             # Calculate intensity across all pulses in the burst
+            # Use this firefly's individual flash_dur and gamma
             b = 0.0
-            total_burst_dur = burst_n * flash_dur + (burst_n - 1) * burst_gap
+            total_burst_dur = burst_n * f.flash_dur + (burst_n - 1) * burst_gap
             elapsed = now - f.flash_start
 
             # Clear flash_start once the full burst (plus tail) is done
-            if elapsed > total_burst_dur + flash_dur * 2:
+            if elapsed > total_burst_dur + f.flash_dur * 2:
                 f.flash_start = None
                 continue
 
             for pulse in range(burst_n):
-                pulse_offset = pulse * (flash_dur + burst_gap)
+                pulse_offset = pulse * (f.flash_dur + burst_gap)
                 t_pulse = elapsed - pulse_offset
                 if t_pulse >= 0:
-                    b = max(b, flash_intensity(t_pulse, flash_dur, gamma))
+                    b = max(b, flash_intensity(t_pulse, f.flash_dur, f.gamma))
 
             b = min(1.0, b)
             if b > 0.01:
