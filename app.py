@@ -193,25 +193,26 @@ class Firefly:
         self.n_leds   = n_leds
         self.next_flash = time.time() + random.uniform(0, interval + jitter)
         self.flash_start = None
-        # Drift: slow random walk along the strip, pauses while flashing
-        self.velocity = random.uniform(-0.02, 0.02)  # LEDs per frame at 20fps
-        self.next_turn = time.time() + random.uniform(2.0, 8.0)
+        # Drift: random walk along the strip, pauses while flashing
+        # Velocity in LEDs per frame at 20fps — min 0.15, max 0.4 so movement is visible
+        self.velocity = random.choice([-1, 1]) * random.uniform(0.15, 0.4)
+        self.next_turn = time.time() + random.uniform(3.0, 10.0)
 
     def drift(self, now):
-        """Wander slowly along the strip; reverse at edges; occasional direction changes."""
+        """Wander along the strip; reverse at edges; occasional direction changes."""
         if self.flash_start is not None:
             return  # Fireflies stay still while flashing (realistic behaviour)
         # Random direction change
         if now >= self.next_turn:
-            self.velocity = random.uniform(-0.02, 0.02)
-            self.next_turn = now + random.uniform(2.0, 8.0)
+            self.velocity = random.choice([-1, 1]) * random.uniform(0.15, 0.4)
+            self.next_turn = now + random.uniform(3.0, 10.0)
         self.led += self.velocity
         # Bounce at strip edges
         if self.led < 0:
-            self.led = 0
+            self.led = 0.0
             self.velocity = abs(self.velocity)
         elif self.led >= self.n_leds:
-            self.led = self.n_leds - 1
+            self.led = float(self.n_leds - 1)
             self.velocity = -abs(self.velocity)
 
     def intensity(self, now, flash_dur, gamma):
