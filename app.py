@@ -34,7 +34,7 @@ state = {
     "jitter": 1.2,
     "gamma": 4.0,
     "coupling": 0.10,
-    "hue": 65,
+    "hue": 60,
     "burst_n": 1,
     "burst_gap": 0.0,
     "waveform": "saikia",
@@ -46,35 +46,35 @@ SPECIES = {
     # ── Single-flash species ───────────────────────────────────
     # P. pyralis — Big Dipper, most common Piedmont/Durham species
     # 0.3s flash, 5.5s interval at 25C (Britannica / Lloyd 1966)
-    "pyralis":      {"n_flies":4,  "flash_dur":0.30,"interval":5.5, "jitter":1.2,"gamma":4.0,"coupling":0.10,"hue":65,  "burst_n":1,"burst_gap":0},
+    "pyralis":      {"n_flies":4,  "flash_dur":0.30,"interval":5.5, "jitter":1.2,"gamma":4.0,"coupling":0.10,"hue":60,  "burst_n":1,"burst_gap":0},
 
     # P. marginellus — quick hop flash, forest edges
     # <0.5s flash, 3s interval (Silent Sparks / Lloyd 1966)
-    "marginellus":  {"n_flies":3,  "flash_dur":0.20,"interval":3.0, "jitter":0.8,"gamma":5.0,"coupling":0.15,"hue":70,  "burst_n":1,"burst_gap":0},
+    "marginellus":  {"n_flies":3,  "flash_dur":0.20,"interval":3.0, "jitter":0.8,"gamma":5.0,"coupling":0.15,"hue":65,  "burst_n":1,"burst_gap":0},
 
     # P. brimleyi — named after NC naturalist, straight fast flight
     # 0.5s flash, ~5s interval (Lloyd 1966)
-    "brimleyi":     {"n_flies":4,  "flash_dur":0.50,"interval":5.0, "jitter":1.5,"gamma":5.0,"coupling":0.10,"hue":68,  "burst_n":1,"burst_gap":0},
+    "brimleyi":     {"n_flies":4,  "flash_dur":0.50,"interval":5.0, "jitter":1.5,"gamma":5.0,"coupling":0.10,"hue":63,  "burst_n":1,"burst_gap":0},
 
     # P. collustrans — lateral arch flash, ~0.4s (Science Friday / Lloyd)
     # flashes 3 times per 2-3 second arch cycle
-    "collustrans":  {"n_flies":4,  "flash_dur":0.40,"interval":2.5, "jitter":0.5,"gamma":6.0,"coupling":0.12,"hue":67,  "burst_n":1,"burst_gap":0},
+    "collustrans":  {"n_flies":4,  "flash_dur":0.40,"interval":2.5, "jitter":0.5,"gamma":6.0,"coupling":0.12,"hue":62,  "burst_n":1,"burst_gap":0},
 
     # P. ignitus — brief precise flash, 0.2s every 5.1s (Lloyd 1966)
-    "ignitus":      {"n_flies":3,  "flash_dur":0.20,"interval":5.1, "jitter":0.8,"gamma":7.0,"coupling":0.08,"hue":63,  "burst_n":1,"burst_gap":0},
+    "ignitus":      {"n_flies":3,  "flash_dur":0.20,"interval":5.1, "jitter":0.8,"gamma":7.0,"coupling":0.08,"hue":58,  "burst_n":1,"burst_gap":0},
 
     # P. granulatus — rapid 0.5s flash every 2s (Lloyd 1966)
-    "granulatus":   {"n_flies":4,  "flash_dur":0.50,"interval":2.0, "jitter":0.4,"gamma":5.0,"coupling":0.10,"hue":66,  "burst_n":1,"burst_gap":0},
+    "granulatus":   {"n_flies":4,  "flash_dur":0.50,"interval":2.0, "jitter":0.4,"gamma":5.0,"coupling":0.10,"hue":61,  "burst_n":1,"burst_gap":0},
 
     # ── Double-flash (burst) species ───────────────────────────
     # P. consanguineus — double pulse, 0.5s gap between pulses (Silent Sparks)
-    "consanguineus":{"n_flies":4,  "flash_dur":0.30,"interval":5.0, "jitter":1.0,"gamma":5.0,"coupling":0.10,"hue":68,  "burst_n":2,"burst_gap":0.5},
+    "consanguineus":{"n_flies":4,  "flash_dur":0.30,"interval":5.0, "jitter":1.0,"gamma":5.0,"coupling":0.10,"hue":63,  "burst_n":2,"burst_gap":0.5},
 
     # P. macdermotti — double pulse, 2s gap between pulses (Silent Sparks)
-    "macdermotti":  {"n_flies":3,  "flash_dur":0.30,"interval":6.0, "jitter":1.2,"gamma":5.0,"coupling":0.08,"hue":70,  "burst_n":2,"burst_gap":2.0},
+    "macdermotti":  {"n_flies":3,  "flash_dur":0.30,"interval":6.0, "jitter":1.2,"gamma":5.0,"coupling":0.08,"hue":65,  "burst_n":2,"burst_gap":2.0},
 
     # P. consimilis — 4-9 quick flashes every 10s (Lloyd 1966)
-    "consimilis":   {"n_flies":3,  "flash_dur":0.15,"interval":10.0,"jitter":2.0,"gamma":6.0,"coupling":0.10,"hue":65,  "burst_n":6,"burst_gap":0.3},
+    "consimilis":   {"n_flies":3,  "flash_dur":0.15,"interval":10.0,"jitter":2.0,"gamma":6.0,"coupling":0.10,"hue":60,  "burst_n":6,"burst_gap":0.3},
 
     # ── Synchronizing species ──────────────────────────────────
     # P. carolinus — synchronous, Great Smoky Mountains NC
@@ -89,17 +89,17 @@ SPECIES = {
     # P. sabulosus — Creekside Tree Blinkers, confirmed in NC
     # Short bright single flash, ~0.42s, repeats every 7s
     # Males flash high in trees (unusual for Photinus)
-    "sabulosus":    {"n_flies":3,  "flash_dur":0.42,"interval":7.0, "jitter":1.5,"gamma":6.0,"coupling":0.08,"hue":67,  "burst_n":1,"burst_gap":0},
+    "sabulosus":    {"n_flies":3,  "flash_dur":0.42,"interval":7.0, "jitter":1.5,"gamma":6.0,"coupling":0.08,"hue":62,  "burst_n":1,"burst_gap":0},
 
     # P. umbratus — Shaded Firefly, confirmed in NC, SC, AL, FL, GA, LA, MS
     # Medium single flash ~0.6s, slower 8-10s interval, flies in shaded forest
-    "umbratus":     {"n_flies":3,  "flash_dur":0.60,"interval":9.0, "jitter":2.0,"gamma":4.5,"coupling":0.08,"hue":64,  "burst_n":1,"burst_gap":0},
+    "umbratus":     {"n_flies":3,  "flash_dur":0.60,"interval":9.0, "jitter":2.0,"gamma":4.5,"coupling":0.08,"hue":59,  "burst_n":1,"burst_gap":0},
 
     # ── Double-flash with long gap ─────────────────────────────
     # P. greeni — two-flash species, interpulse interval 1.1-1.7s at 27C
     # (Buck & Case 1986, Branham & Greenfield 1996)
     # Very long gap between pulses compared to consanguineus
-    "greeni":       {"n_flies":3,  "flash_dur":0.30,"interval":8.0, "jitter":1.5,"gamma":5.0,"coupling":0.08,"hue":68,  "burst_n":2,"burst_gap":1.4},
+    "greeni":       {"n_flies":3,  "flash_dur":0.30,"interval":8.0, "jitter":1.5,"gamma":5.0,"coupling":0.08,"hue":63,  "burst_n":2,"burst_gap":1.4},
 
     # ── Continuous glow ────────────────────────────────────────
     # Phausis reticulata — Blue Ghost, found in Triangle/Durham NC!
@@ -323,7 +323,10 @@ def run_simulation():
             if b > 0.01:
                 # Apply exponential perception correction before RGB conversion
                 b_perc = perceptual(b) / 255.0
-                r, g, bl = hsl_to_rgb(hue, 85, int(20 + b_perc * 55))
+                # Lower peak lightness (45 vs 75) and saturation (70 vs 85)
+                # for a warm candle-like glow rather than a bright neon flash.
+                # Lightness range 8->45 keeps it dim and warm at low brightness.
+                r, g, bl = hsl_to_rgb(hue, 70, int(8 + b_perc * 37))
                 r  = int(r  * b_perc)
                 g  = int(g  * b_perc)
                 bl = int(bl * b_perc)
@@ -355,7 +358,17 @@ def run_simulation():
     sock.close()
 
     try:
-        requests.post(url, json={"on": False}, timeout=1)
+        # Send a zero-timeout WARLS packet to immediately exit realtime mode
+        exit_packet = bytearray([1, 0])
+        exit_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        exit_sock.sendto(bytes(exit_packet), (ip, udp_port))
+        exit_sock.close()
+        time.sleep(0.1)
+        # Then power off cleanly via HTTP with frz=False to restore WLED control
+        requests.post(url, json={
+            "on": False,
+            "seg": [{"id": 0, "frz": False}]
+        }, timeout=1)
     except Exception:
         pass
 
